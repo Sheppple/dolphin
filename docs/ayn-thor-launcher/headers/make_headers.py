@@ -3,7 +3,7 @@
 Titles: HOME, LIBRARY, PLATFORMS, COLLECTIONS, APPS
 Colours: red (light sweep + colour-split glitch + neon flicker), blue (light sweep + colour-split glitch)
 Sizes:   banner 900 x 300 (3x1 tile), strip 1800 x 300 (full-width 6x1 tile); the title is centred
-         tile-2x1 600 x 288: GIF for a 2-square Cocoon tile, full soft glow on a black rounded card
+         tile-2x1 600 x 288: GIF for a 2-square Cocoon tile, full soft glow on a slim 600 x 150 black rounded bar
 
 Two formats per header:
   .gif   GIF transparency is on/off only, so the glow is blended onto black and cut out around it.
@@ -34,7 +34,8 @@ TITLES = ["HOME", "LIBRARY", "PLATFORMS", "COLLECTIONS", "APPS"]
 SIZES = {"banner": (900, 300), "strip": (1800, 300)}
 # 2x1 Cocoon tile (two 279 px squares + a 24 px gap is about 582 x 279): soft glow on a black rounded card
 TILE_SIZE = (600, 288)
-TILE_RADIUS = 34
+CARD_SIZE = (600, 150)   # slim black bar, centred in the tile with transparent space above and below
+TILE_RADIUS = 30
 CLEAN_ALPHA_CUTOFF = 0.3
 
 
@@ -47,11 +48,11 @@ def title_font(font_dir, size):
     return f
 
 
-def render(style_key, title, w, h, font_dir, clean=False):
+def render(style_key, title, w, h, font_dir, clean=False, title_k=0.46):
     """clean=True: a tight glow only, so a hard-edged GIF has no dark halo on light backgrounds."""
     S = {k: np.array(v, dtype=np.float32) / 255.0 for k, v in STYLES[style_key].items()}
     pad = int(h * (0.1 if clean else 0.2))
-    size = int(h * 0.46)
+    size = int(h * title_k)
     while True:
         ft = title_font(font_dir, size)
         if ft.getlength(title) <= w - 2 * pad or size < 20:
@@ -159,13 +160,19 @@ def save_gif_clean(frames, path):
     out[0].save(path, save_all=True, append_images=out[1:], duration=FRAME_MS, loop=0, disposal=2, transparency=255, optimize=False)
 
 
-def save_gif_card(frames, path, radius=TILE_RADIUS):
-    """Soft glow composited onto an OLED-black rounded rectangle; only the corners are transparent."""
-    w, h = frames[0][0].shape[1], frames[0][0].shape[0]
+def save_gif_card(frames, path, canvas=TILE_SIZE, radius=TILE_RADIUS):
+    """Soft glow on an OLED-black rounded bar, centred on a transparent canvas the size of the tile."""
+    cw, ch = frames[0][0].shape[1], frames[0][0].shape[0]
+    w, h = canvas
+    ox, oy = (w - cw) // 2, (h - ch) // 2
     card = Image.new("L", (w * 4, h * 4), 0)
-    ImageDraw.Draw(card).rounded_rectangle((0, 0, w * 4 - 1, h * 4 - 1), radius=radius * 4, fill=255)
+    ImageDraw.Draw(card).rounded_rectangle((ox * 4, oy * 4, (ox + cw) * 4 - 1, (oy + ch) * 4 - 1), radius=radius * 4, fill=255)
     inside = np.asarray(card.resize((w, h), Image.LANCZOS)) >= 128
-    rgbs = [Image.fromarray((np.clip(pre, 0, 1) * 255).astype(np.uint8), "RGB") for pre, _ in frames]
+    rgbs = []
+    for pre, _ in frames:
+        full = np.zeros((h, w, 3), np.float32)
+        full[oy:oy + ch, ox:ox + cw] = pre
+        rgbs.append(Image.fromarray((np.clip(full, 0, 1) * 255).astype(np.uint8), "RGB"))
     vis = np.concatenate([np.asarray(im)[inside] for im in rgbs])
     pal = Image.fromarray(vis.reshape(1, -1, 3), "RGB").quantize(colors=255, method=Image.Quantize.MEDIANCUT)
     palette = pal.getpalette()[:255 * 3] + [0, 0, 0]
@@ -190,7 +197,7 @@ def main():
         for title in TITLES:
             path = Path(a.out) / style / "tile-2x1" / f"{title.lower()}.gif"
             path.parent.mkdir(parents=True, exist_ok=True)
-            save_gif_card(render(style, title, *TILE_SIZE, a.fonts), path)
+            save_gif_card(render(style, title, *CARD_SIZE, a.fonts, title_k=0.6), path)
             print(path, path.stat().st_size // 1024, "KB")
     if a.tiles_only:
         return
