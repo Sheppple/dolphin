@@ -1,0 +1,209 @@
+<title>Thor Icon Set</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Poppins:wght@400;500;600&family=Unbounded:wght@800&display=swap">
+<style>
+/* Layout: brief + style switch, then the set in three groups (your folders, more platforms, extras).
+   Dark-only page: the icons are made for a black OLED home screen. */
+*,*::before,*::after{box-sizing:border-box}
+:root{--bg:#08070b;--surface:#121019;--fg:#efedf4;--muted:#9a95a8;--line:#272331;--acc:#ff2d55;
+  --display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;--body:"Poppins",system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.6;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:30px 80px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+.mast{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:14px 40px;align-items:end}
+@media (max-width:820px){.mast{grid-template-columns:minmax(0,1fr)}}
+.eyebrow{font:700 12px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.mast h1{font-size:clamp(34px,5vw,56px);font-weight:800;letter-spacing:-.035em;line-height:.98}
+.mast h1 em{font-style:normal;color:var(--acc)}
+.mast p{margin:0;color:var(--muted);max-width:62ch}
+.bar{position:sticky;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:5;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:28px 0 8px;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 90%,transparent);backdrop-filter:blur(10px)}
+.bar .lab{font:700 12px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:#000}
+.seg button{font:600 14px var(--body);padding:6px 14px;border-radius:999px;border:0;background:transparent;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--acc);color:#fff}
+.seg button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.bar .count{margin-left:auto;font-size:13px;color:var(--muted)}
+section{margin-top:40px}
+section h2{font-size:clamp(22px,3vw,30px);font-weight:800;letter-spacing:-.02em}
+section h2 small{font:500 14px var(--body);color:var(--muted);margin-left:10px;letter-spacing:0}
+section h3{font:700 13px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:22px 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:18px 14px}
+.cell{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;min-width:0}
+.cell svg{width:100%;max-width:120px;height:auto;display:block}
+.cell span{font-size:13px;line-height:1.25;color:var(--fg)}
+.cell small{display:block;color:var(--muted);font-size:11.5px}
+.preview{margin-top:44px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:radial-gradient(ellipse at 30% 0%,#2a0d2e,transparent 60%),radial-gradient(ellipse at 90% 100%,#3a0618,transparent 55%),#050407}
+.preview .pg{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3%;padding:4% 4% 5%;max-width:900px;margin:0 auto}
+.preview .pg svg{width:100%;height:auto;display:block;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5))}
+.preview p{margin:0;padding:12px 16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.notes{margin-top:44px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px 28px}
+.notes div{padding:14px 0;border-top:1px solid var(--line)}
+.notes h3{font-size:17px;font-weight:800;color:var(--fg);text-transform:none;letter-spacing:0;margin:0}
+.notes p{margin:4px 0 0;font-size:14px;color:var(--muted)}
+body.export{background:transparent}
+body.export .wrap{display:none}
+#export{display:none}
+body.export #export{display:flex;flex-wrap:wrap;gap:8px}
+body.export #export svg{width:512px;height:512px}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div><div class="eyebrow">Folder icons for Cocoon · AYN Thor</div><h1>Thor <em>icon set</em></h1></div>
+    <p>One icon for every folder on your four pages, plus the other systems Cocoon can show. Two finishes: <b>Gradient</b>, after the colourful Cocoon pack, and <b>OLED</b>, after the dark service icons, with a red edge to match your theme.</p>
+  </header>
+  <div class="bar"><span class="lab">Finish</span><div class="seg" id="seg"><button data-v="gradient" aria-pressed="true">Gradient</button><button data-v="oled" aria-pressed="false">OLED</button></div><span class="count" id="count"></span></div>
+  <div id="sets"></div>
+  <div class="preview" aria-label="Preview on the Platforms page"><div class="pg" id="pg"></div><p>Your Platforms page, laid out as planned: All Games, Emulators and Android on the left wall, Miles kept clear, then the nine systems.</p></div>
+  <section class="notes">
+    <div><h3>Original symbols</h3><p>No official logos: each system is drawn as its hardware, its controller or a short text mark (PS2, N64, 3DO). They stay recognisable without copying anyone's brand.</p></div>
+    <div><h3>Same rules everywhere</h3><p>One tile shape, one stroke weight and one tilt across all 51, so mixed pages still look like a set.</p></div>
+    <div><h3>Files</h3><p>Each icon is a 512 × 512 PNG with transparent corners, in both finishes, named after its folder (for example <b>ps2.png</b>, <b>spider-verse.png</b>).</p></div>
+  </section>
+</div>
+<div id="export"></div>
+
+<script>
+(() => {
+'use strict';
+/* ───── Glyph primitives in a 100 × 100 box ─────
+   mode s = white stroke, f = white fill, k = cut-out in the tile colour, sx = stroke with a gap around it */
+const P = (d,m='s',w=7) => ({t:'p',d,m,w});
+const C = (x,y,r,m='s',w=7) => ({t:'c',x,y,r,m,w});
+const R = (x,y,w,h,r=0,m='s',sw=7) => ({t:'r',x,y,wd:w,h,r,m,w:sw});
+const L = (x1,y1,x2,y2,w=7,m='s') => ({t:'p',d:`M${x1} ${y1} L${x2} ${y2}`,m,w});
+const E = (x,y,rx,ry,rot,m='s',w=7) => ({t:'e',x,y,rx,ry,rot,m,w});
+const X = (s,size,y=50,m='f') => ({t:'x',s,size,y,m});
+
+const ICONS = [
+ // ── your platform folders ──
+ {k:'all-games',n:'All Games',g:'yours',c:['#ff2d55','#7b2ff7'],el:[R(16,16,30,30,8),R(54,16,30,30,8),R(16,54,30,30,8),R(54,54,30,30,8,'f')]},
+ {k:'emulators',n:'Emulators',g:'yours',c:['#8b5cf6','#ec4899'],el:[R(28,28,44,44,7),R(40,40,20,20,3,'f'),P('M38 16 V26 M50 16 V26 M62 16 V26 M38 74 V84 M50 74 V84 M62 74 V84 M16 38 H26 M16 50 H26 M16 62 H26 M74 38 H84 M74 50 H84 M74 62 H84','s',6)]},
+ {k:'android',n:'Android',g:'yours',c:['#22c55e','#0f766e'],el:[R(30,10,40,80,10),L(43,80,57,80,5),P('M43 36 L61 50 L43 64 Z','f')]},
+ {k:'ps2',n:'PS2',g:'yours',c:['#2546d9','#0b1544'],el:[X('PS2',30)]},
+ {k:'ps3',n:'PS3',g:'yours',c:['#3b3f9e','#0a0a14'],el:[X('PS3',30)]},
+ {k:'psp',n:'PSP',g:'yours',c:['#64748b','#1e293b'],el:[R(6,31,88,38,19),R(29,38,42,24,3,'s',5),P('M18 44 V56 M12 50 H24','s',4.5),C(82,45,3,'f'),C(82,55,3,'f'),C(77,50,3,'f'),C(87,50,3,'f')]},
+ {k:'wii',n:'Wii',g:'yours',c:['#38bdf8','#0e7490'],el:[R(35,6,30,88,14),P('M50 18 V34 M42 26 H58','s',5.5),C(50,46,6,'f'),C(50,64,3,'f'),C(50,73,3,'f')]},
+ {k:'wii-u',n:'Wii U',g:'yours',c:['#06b6d4','#155e75'],el:[R(6,24,88,52,15),R(27,32,46,36,3,'s',5),C(16,40,4.5,'f'),C(84,40,4.5,'f'),C(16,60,3,'f'),C(84,60,3,'f')]},
+ {k:'switch',n:'Switch',g:'yours',c:['#ff3b3b','#3b82f6'],el:[P('M30 26 H22 A13 13 0 0 0 9 39 V61 A13 13 0 0 0 22 74 H30 Z'),P('M70 26 H78 A13 13 0 0 1 91 39 V61 A13 13 0 0 1 78 74 H70 Z'),R(34,26,32,48,3,'s',6),C(20,40,4,'f'),C(80,60,4,'f')]},
+ {k:'3ds',n:'3DS',g:'yours',c:['#ec4899','#9d174d'],el:[R(18,8,64,38,7),X('3D',15,27),L(26,50,74,50,5),R(22,54,56,38,7),C(33,66,4.5,'f'),R(44,60,26,22,2,'s',4)]},
+ {k:'xbox-360',n:'Xbox 360',g:'yours',c:['#4ade80','#14532d'],el:[C(50,50,38,'s',7),X('360',23)]},
+ {k:'pc-steam',n:'PC / Steam',g:'yours',c:['#3b82f6','#0f172a'],el:[R(12,14,76,52,7),P('M50 66 V78 M32 84 H68','s',7),X('PC',22,40)]},
+ // ── your regex collections ──
+ {k:'spider-verse',n:'Spider-Verse',g:'collections',c:['#ef233c','#1a0b2e'],el:[L(50,4,50,30,4),C(50,34,6,'f'),C(50,51,12,'f'),P('M40 44 L26 32 L18 38 M39 50 L21 48 L12 56 M40 57 L27 66 L21 80 M44 62 L36 76 L34 90 M60 44 L74 32 L82 38 M61 50 L79 48 L88 56 M60 57 L73 66 L79 80 M56 62 L64 76 L66 90','s',4.5),P('M44 46 L48 50 M56 46 L52 50','k',3)]},
+ {k:'persona',n:'Persona',g:'collections',c:['#e11d48','#111111'],el:[P('M6 42 C14 28 34 28 50 38 C66 28 86 28 94 42 C92 62 76 70 62 66 C56 64 52 60 50 57 C48 60 44 64 38 66 C24 70 8 62 6 42 Z','f'),P('M20 46 C25 39 36 39 41 46 C36 53 25 53 20 46 Z','k'),P('M59 46 C64 39 75 39 80 46 C75 53 64 53 59 46 Z','k')]},
+ {k:'souls',n:'Souls',g:'collections',c:['#f97316','#1c0a02'],el:[P('M22 88 L78 72 M22 72 L78 88','s',7),P('M50 74 C33 66 34 49 43 38 C43 48 49 51 50 51 C50 40 57 31 53 17 C68 30 71 45 65 57 C63 63 58 69 50 74 Z','f'),L(50,6,50,46,5,'sx'),L(41,20,59,20,5,'sx')]},
+ {k:'mario',n:'Mario',g:'collections',c:['#ef4444','#f59e0b'],el:[P('M10 56 C10 28 29 12 50 12 C71 12 90 28 90 56 Z','f'),C(50,31,9,'k'),C(25,46,7,'k'),C(75,46,7,'k'),R(29,56,42,32,13,'f'),R(40,63,5,12,2.5,'k'),R(55,63,5,12,2.5,'k')]},
+ {k:'zelda',n:'Zelda',g:'collections',c:['#16a34a','#ca8a04'],el:[P('M50 10 L82 21 V46 C82 67 67 81 50 90 C33 81 18 67 18 46 V21 Z'),L(50,26,50,74,6),L(39,36,61,36,6),C(50,26,3.5,'f')]},
+ {k:'pokemon',n:'Pokémon',g:'collections',c:['#ef4444','#7f1d1d'],el:[P('M13 50 A37 37 0 0 1 87 50 H62 A12 12 0 0 0 38 50 Z','f'),C(50,50,37),L(13,50,38,50),L(62,50,87,50),C(50,50,11)]},
+ {k:'halo-gears',n:'Halo & Gears',g:'collections',c:['#65a30d','#1a2e05'],el:[P('M20 58 C20 30 34 14 50 14 C66 14 80 30 80 58 V74 C80 81 76 86 69 86 H31 C24 86 20 81 20 74 Z'),P('M28 46 C28 38 36 33 50 33 C64 33 72 38 72 46 V55 C72 60 68 63 63 63 H37 C32 63 28 60 28 55 Z','f')]},
+ {k:'racing',n:'Racing',g:'collections',c:['#facc15','#ea580c'],el:[L(20,8,20,92,6),R(20,14,60,39,0,'s',5),R(20,14,15,13,0,'f'),R(50,14,15,13,0,'f'),R(35,27,15,13,0,'f'),R(65,27,15,13,0,'f'),R(20,40,15,13,0,'f'),R(50,40,15,13,0,'f')]},
+ {k:'final-fantasy-kh',n:'FF & Kingdom Hearts',g:'collections',c:['#60a5fa','#6d28d9'],el:[P('M50 5 L74 40 L50 95 L26 40 Z'),P('M26 40 H74 M50 5 L41 40 L50 95 L59 40 Z','s',3.5),P('M84 12 V26 M77 19 H91','s',3.5)]},
+ {k:'god-of-war',n:'God of War',g:'collections',c:['#b91c1c','#a16207'],el:[L(24,90,64,22,7),P('M52 18 C60 4 86 6 92 28 C83 24 74 28 70 38 Z','f'),P('M52 18 L44 10','s',5)]},
+ // ── more systems Cocoon can show ──
+ {k:'nes',n:'NES',g:'more',c:['#dc2626','#27272a'],el:[R(8,30,84,40,5),P('M26 42 V58 M18 50 H34','s',6),R(41,52,8,4,2,'f'),R(52,52,8,4,2,'f'),C(69,54,5,'f'),C(81,54,5,'f')]},
+ {k:'snes',n:'SNES',g:'more',c:['#a78bfa','#4c1d95'],el:[P('M30 30 H70 A20 20 0 0 1 70 70 H30 A20 20 0 0 1 30 30 Z'),P('M28 42 V58 M20 50 H36','s',5),C(72,41,4,'f'),C(80,50,4,'f'),C(72,59,4,'f'),C(64,50,4,'f')]},
+ {k:'n64',n:'Nintendo 64',g:'more',c:['#22c55e','#dc2626'],el:[X('64',40)]},
+ {k:'gamecube',n:'GameCube',g:'more',c:['#7c3aed','#312e81'],el:[P('M50 9 L85 29 V71 L50 91 L15 71 V29 Z'),P('M15 29 L50 49 L85 29 M50 49 V91','s',6),R(56,56,14,14,2,'f')]},
+ {k:'game-boy',n:'Game Boy',g:'more',c:['#a3a3a3','#3f6212'],el:[P('M30 7 H70 A6 6 0 0 1 76 13 V78 A15 15 0 0 1 61 93 H30 A6 6 0 0 1 24 87 V13 A6 6 0 0 1 30 7 Z'),R(32,15,36,28,3,'s',5),P('M38 55 V71 M30 63 H46','s',5),C(61,66,4.5,'f'),C(69,59,4.5,'f')]},
+ {k:'game-boy-color',n:'Game Boy Color',g:'more',c:['#f472b6','#7c3aed'],el:[P('M30 7 H70 A6 6 0 0 1 76 13 V78 A15 15 0 0 1 61 93 H30 A6 6 0 0 1 24 87 V13 A6 6 0 0 1 30 7 Z'),R(32,15,36,28,3,'f'),X('C',18,29,'k'),P('M38 55 V71 M30 63 H46','s',5),C(61,66,4.5,'f'),C(69,59,4.5,'f')]},
+ {k:'game-boy-advance',n:'Game Boy Advance',g:'more',c:['#6366f1','#1e1b4b'],el:[P('M22 27 H78 C90 27 95 39 95 50 C95 62 89 73 78 73 H22 C11 73 5 62 5 50 C5 39 10 27 22 27 Z'),R(33,35,34,30,2,'s',5),P('M19 43 V57 M12 50 H26','s',4.5),C(78,46,4,'f'),C(85,54,4,'f')]},
+ {k:'ds',n:'Nintendo DS',g:'more',c:['#94a3b8','#334155'],el:[R(18,8,64,38,7),R(29,15,42,24,2,'s',4),L(26,50,74,50,5),R(18,54,64,38,7),R(36,61,28,24,2,'s',4),P('M26 66 V78 M20 72 H32','s',3.5),C(73,68,3,'f'),C(73,77,3,'f')]},
+ {k:'virtual-boy',n:'Virtual Boy',g:'more',c:['#ef4444','#111111'],el:[R(14,18,72,32,11),C(36,34,7,'f'),C(64,34,7,'f'),P('M40 50 L31 86 M60 50 L69 86 M26 88 H74','s',6)]},
+ {k:'ps1',n:'PS1',g:'more',c:['#9ca3af','#1f2937'],el:[X('PS1',30)]},
+ {k:'ps-vita',n:'PS Vita',g:'more',c:['#2563eb','#020617'],el:[X('VITA',25)]},
+ {k:'xbox',n:'Xbox',g:'more',c:['#16a34a','#052e16'],el:[X('X',64,52)]},
+ {k:'mega-drive',n:'Mega Drive / Genesis',g:'more',c:['#1d4ed8','#111827'],el:[P('M12 46 C12 33 23 27 35 29 C44 31 56 31 65 29 C77 27 88 33 88 46 C88 63 77 73 64 67 C58 64 42 64 36 67 C23 73 12 63 12 46 Z'),P('M30 40 V54 M23 47 H37','s',5),C(60,53,4.5,'f'),C(70,48,4.5,'f'),C(80,43,4.5,'f')]},
+ {k:'master-system',n:'Master System',g:'more',c:['#ef4444','#18181b'],el:[X('SMS',27)]},
+ {k:'game-gear',n:'Game Gear',g:'more',c:['#3f3f46','#0a0a0a'],el:[X('GG',38)]},
+ {k:'saturn',n:'Saturn',g:'more',c:['#6366f1','#0f172a'],el:[C(50,50,22,'f'),E(50,50,44,13,-18,'sx',6)]},
+ {k:'dreamcast',n:'Dreamcast',g:'more',c:['#f97316','#c2410c'],el:[X('DC',40)]},
+ {k:'sega-cd',n:'Sega CD',g:'more',c:['#0ea5e9','#1e3a8a'],el:[C(50,50,38,'s',7),P('M28 30 A30 30 0 0 1 48 20','s',4),X('CD',22)]},
+ {k:'neo-geo',n:'Neo Geo',g:'more',c:['#eab308','#713f12'],el:[X('NEO',24,37),X('GEO',24,64)]},
+ {k:'arcade',n:'Arcade',g:'more',c:['#d946ef','#4a044e'],el:[P('M28 8 H72 L68 30 V52 L78 60 V92 H22 V60 L32 52 V30 Z'),R(38,16,24,24,2,'s',4),L(42,62,42,70,4),C(42,60,4,'f'),C(56,64,3,'f'),C(64,64,3,'f')]},
+ {k:'atari-2600',n:'Atari 2600',g:'more',c:['#f59e0b','#451a03'],el:[R(18,56,64,32,7),L(50,64,50,26,8),C(50,20,10,'f'),C(31,66,5,'f')]},
+ {k:'pc-engine',n:'PC Engine',g:'more',c:['#f97316','#7c2d12'],el:[X('PCE',27)]},
+ {k:'3do',n:'3DO',g:'more',c:['#a3e635','#3f6212'],el:[X('3DO',27)]},
+ {k:'msx',n:'MSX',g:'more',c:['#38bdf8','#1e3a8a'],el:[X('MSX',27)]},
+ {k:'dos',n:'DOS',g:'more',c:['#475569','#020617'],el:[R(9,17,82,66,8),L(9,31,91,31,5),{t:'x',s:'C:\\>',size:17,y:57,m:'f'}]},
+ {k:'scummvm',n:'ScummVM',g:'more',c:['#22c55e','#164e63'],el:[P('M18 16 H82 A8 8 0 0 1 90 24 V52 A8 8 0 0 1 82 60 H46 L32 74 V60 H18 A8 8 0 0 1 10 52 V24 A8 8 0 0 1 18 16 Z'),C(34,38,4.5,'f'),C(50,38,4.5,'f'),C(66,38,4.5,'f'),P('M64 56 L64 92 L72 84 L78 96 L84 93 L78 81 L90 81 Z','f')]},
+ // ── extras ──
+ {k:'favourites',n:'Favourites',g:'extras',c:['#f43f5e','#9f1239'],el:[P('M50 86 C20 66 10 50 10 36 C10 22 22 14 32 14 C40 14 46 18 50 26 C54 18 60 14 68 14 C78 14 90 22 90 36 C90 50 80 66 50 86 Z','f')]},
+ {k:'recently-played',n:'Recently played',g:'extras',c:['#8b5cf6','#1e1b4b'],el:[C(50,52,34),P('M50 32 V52 L64 61','s',6),P('M14 24 L22 30 L28 20','s',5)]},
+ {k:'random',n:'Random',g:'extras',c:['#ec4899','#7e22ce'],el:[R(16,16,68,68,14),C(34,34,6,'f'),C(66,34,6,'f'),C(50,50,6,'f'),C(34,66,6,'f'),C(66,66,6,'f')]}
+];
+const GROUPS = [
+ ['yours','Your folders','Platforms page',ICONS.filter(i => i.g==='yours')],
+ ['collections','Your folders','Collections page',ICONS.filter(i => i.g==='collections')],
+ ['more','More systems','Other systems Cocoon can show',ICONS.filter(i => i.g==='more')],
+ ['extras','Extras','For smart folders',ICONS.filter(i => i.g==='extras')]
+];
+
+/* ───── Composer ───── */
+function hexMix(a,b,t){ const pa = [1,3,5].map(i => parseInt(a.substr(i,2),16)), pb = [1,3,5].map(i => parseInt(b.substr(i,2),16)); return '#' + pa.map((v,i) => Math.round(v+(pb[i]-v)*t).toString(16).padStart(2,'0')).join(''); }
+function elSVG(e, layer, P){
+  const m = e.m, w = e.w || 7;
+  let stroke = 'none', fill = 'none', sw = 0, extra = '';
+  if(layer==='out'){
+    if(m==='k') return '';
+    stroke = P.out; sw = (m==='s'||m==='sx') ? w + 9 : 9; fill = (m==='f') ? P.out : 'none';
+    if(e.t==='x'){ fill = P.out; sw = 7; }
+  } else if(layer==='gap'){
+    if(m!=='sx') return ''; stroke = P.cut; sw = w + 7;
+  } else {
+    if(m==='s'||m==='sx'){ stroke = '#ffffff'; sw = w; }
+    else if(m==='f'){ fill = '#ffffff'; }
+    else if(m==='k'){ fill = P.cut; if(e.t==='p' && e.w && e.d.indexOf('Z')<0){ fill = 'none'; stroke = P.cut; sw = e.w; } }
+  }
+  const common = `fill="${fill}" stroke="${stroke}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"`;
+  switch(e.t){
+    case 'p': return `<path d="${e.d}" ${common}/>`;
+    case 'c': return `<circle cx="${e.x}" cy="${e.y}" r="${e.r}" ${common}/>`;
+    case 'r': return `<rect x="${e.x}" y="${e.y}" width="${e.wd}" height="${e.h}" rx="${e.r}" ${common}/>`;
+    case 'e': return `<ellipse cx="${e.x}" cy="${e.y}" rx="${e.rx}" ry="${e.ry}" transform="rotate(${e.rot} ${e.x} ${e.y})" ${common}/>`;
+    case 'x': return `<text x="50" y="${e.y}" text-anchor="middle" dominant-baseline="central" font-family="Unbounded, 'Arial Black', sans-serif" font-weight="800" font-size="${e.size}" letter-spacing="-0.5" ${common} paint-order="stroke">${e.s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</text>`;
+  }
+  return '';
+}
+let uid = 0;
+function iconSVG(ic, finish, size){
+  const id = 'i' + (++uid), [c1,c2] = ic.c;
+  const oled = finish==='oled';
+  const P = oled ? {out:'#ff2d55', cut:'#0b0a0e'} : {out:hexMix(c2,'#000000',.45), cut:hexMix(c1,c2,.5)};
+  const layers = ic.el.map(e => elSVG(e,'out',P)).join('') + ic.el.map(e => (e.m==='sx' ? elSVG(e,'gap',P) : '') + elSVG(e,'top',P)).join('');
+  const tilt = oled ? 0 : -7;
+  const tile = oled
+    ? `<rect x="16" y="16" width="480" height="480" rx="76" fill="url(#${id}b)"/><rect x="16" y="16" width="480" height="480" rx="76" fill="url(#${id}g)"/><rect x="19" y="19" width="474" height="474" rx="73" fill="none" stroke="#ff2d55" stroke-opacity=".55" stroke-width="5"/>`
+    : `<rect x="16" y="16" width="480" height="480" rx="76" fill="url(#${id}b)"/><rect x="16" y="16" width="480" height="480" rx="76" fill="url(#${id}h)"/><rect x="18.5" y="18.5" width="475" height="475" rx="73.5" fill="none" stroke="#ffffff" stroke-opacity=".45" stroke-width="5"/>`;
+  const defs = oled
+    ? `<linearGradient id="${id}b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#17151c"/><stop offset="1" stop-color="#050407"/></linearGradient>
+       <radialGradient id="${id}g" cx=".5" cy="1.05" r=".75"><stop offset="0" stop-color="#ff2d55" stop-opacity=".42"/><stop offset="1" stop-color="#ff2d55" stop-opacity="0"/></radialGradient>
+       <filter id="${id}s" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow in="SourceGraphic" dx="0" dy="0" stdDeviation="7" flood-color="#ff2d55" flood-opacity=".75"/></filter>`
+    : `<linearGradient id="${id}b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>
+       <radialGradient id="${id}h" cx=".22" cy=".12" r=".8"><stop offset="0" stop-color="#ffffff" stop-opacity=".38"/><stop offset=".55" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
+       <filter id="${id}s" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#000000" flood-opacity=".35"/></filter>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="${size}" height="${size}" role="img" aria-label="${ic.n}" data-key="${ic.k}" data-finish="${finish}"><defs>${defs}</defs>${tile}<g filter="url(#${id}s)"><g transform="translate(96 96) scale(3.2) rotate(${tilt} 50 50)">${layers}</g></g></svg>`;
+}
+
+/* ───── Page ───── */
+let finish = 'gradient';
+const sets = document.getElementById('sets');
+function render(){
+  sets.innerHTML = GROUPS.map(([key,title,sub,list],i) => `${i===0||GROUPS[i-1][1]!==title?`<section><h2>${title}<small>${title==='Your folders'?'22 icons':title==='More systems'?list.length+' icons':list.length+' icons'}</small></h2>`:''}<h3>${sub}</h3><div class="grid">${list.map(ic => `<div class="cell">${iconSVG(ic,finish,120)}<span>${ic.n}<small>${ic.k}.png</small></span></div>`).join('')}</div>${i===GROUPS.length-1||GROUPS[i+1][1]!==title?'</section>':''}`).join('');
+  const order = ['all-games',null,null,'ps2','ps3','psp','emulators',null,null,'wii','wii-u','switch','android',null,null,'3ds','xbox-360','pc-steam'];
+  document.getElementById('pg').innerHTML = order.map(k => k ? iconSVG(ICONS.find(i => i.k===k),finish,150) : '<div></div>').join('');
+  document.getElementById('count').textContent = `${ICONS.length} icons · 512 × 512 PNG`;
+  document.querySelectorAll('#seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v===finish)));
+}
+document.getElementById('seg').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if(!b) return; finish = b.dataset.v; render(); });
+render();
+
+// export mode for the PNG renderer (local only): every icon at 512 px in both finishes
+if(/[?&]export\b/.test(location.search)){
+  document.body.classList.add('export');
+  document.getElementById('export').innerHTML = ['gradient','oled'].map(f => ICONS.map(ic => iconSVG(ic,f,512)).join('')).join('');
+}
+window.__ICONS = ICONS.map(i => i.k);
+})();
+</script>
