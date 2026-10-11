@@ -1,0 +1,949 @@
+<title>Crimson Web</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;800&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Bungee&family=JetBrains+Mono:wght@400;600&family=Lexend:wght@400;600;700&family=Manrope:wght@400;600;800&family=Rubik:wght@400;500;700;800&display=swap">
+<style>
+/* Layout: a single dark page built around one black AYN Thor; accent picker above, short notes below.
+   Deliberately dark-only: these setups exist to keep OLED pixels off, so the page commits to that look. */
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#050506; --surface:#0f1013; --fg:#ecedf1; --muted:#8c909a; --line:#22242a;
+  --display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --acc:#ff2a45; --acc-hi:#ff8a9b; --acc-lo:#4a0410;
+  color-scheme:dark;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:20px;padding-block:28px 72px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+.masthead{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:12px 40px;align-items:end;margin-bottom:22px}
+@media (max-width:820px){.masthead{grid-template-columns:minmax(0,1fr)}}
+.eyebrow-l{font:700 12px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.masthead h1{font-size:clamp(36px,5.4vw,58px);font-weight:800;letter-spacing:-.035em;line-height:.95;margin-top:8px}
+.masthead h1 em{font-style:normal;color:var(--acc)}
+.masthead p{margin:0;color:var(--muted);max-width:60ch}
+.controls{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);margin-bottom:26px}
+.controls .lab{font:700 12px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.swatches{display:flex;flex-wrap:wrap;gap:8px}
+.swatches button{display:inline-flex;align-items:center;gap:8px;font:600 14px var(--body);padding:6px 12px 6px 8px;border-radius:999px;border:1px solid var(--line);background:#000;color:var(--fg);cursor:pointer}
+.swatches button i{width:16px;height:16px;border-radius:50%;box-shadow:0 0 10px currentColor}
+.swatches button[aria-pressed="true"]{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
+.swatches button:focus-visible,.plain:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.keys{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin-left:auto}
+kbd{font-family:var(--mono);font-size:12px;padding:1px 6px;border-radius:6px;border:1px solid var(--line);background:#000;color:var(--fg)}
+.hintline{font-size:14px;color:var(--muted);text-align:center;margin:14px 0 0}
+.hintline b{color:var(--fg)}
+.notes{margin-top:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px 28px}
+.notes div{padding:14px 0;border-top:1px solid var(--line)}
+.notes h3{font-size:17px;font-weight:800}
+.notes p{margin:4px 0 0;font-size:15px;color:var(--muted)}
+
+/* ───────── Black AYN Thor, stick LEDs follow the accent ───────── */
+.thor{--shell:#1d1e22;--shell-hi:#27282d;--shell-lo:#0f1012;--bezel:#060607;--btn:#2c2d32;--bink:#9da0a8;
+  container-type:inline-size;width:100%;max-width:900px;margin-inline:auto;outline:none;user-select:none;-webkit-user-select:none;position:relative}
+.thor:focus-visible .lid{box-shadow:0 0 0 3px var(--acc),0 1cqw 3cqw rgba(0,0,0,.5)}
+.lid{background:linear-gradient(180deg,var(--shell-hi),var(--shell));border-radius:4cqw 4cqw 1.4cqw 1.4cqw;padding:2.4cqw 3cqw 2.8cqw;box-shadow:inset 0 .15cqw 0 rgba(255,255,255,.05),inset 0 -.4cqw 0 var(--shell-lo),0 1cqw 3cqw rgba(0,0,0,.5)}
+.bezel{background:var(--bezel);border-radius:1.8cqw;padding:1.1cqw}
+.hingerow{display:grid;grid-template-columns:13cqw 1fr 13cqw;gap:2cqw;align-items:start;padding-inline:3cqw}
+.hinge{height:3.4cqw;background:linear-gradient(var(--shell-lo),var(--shell));border-radius:0 0 1.2cqw 1.2cqw}
+.shoulder{height:2.2cqw;margin-top:.6cqw;border:0;border-radius:1.2cqw;background:var(--shell-lo);color:#5d6067;font:800 1.3cqw/1 var(--display);cursor:pointer;padding:0}
+.shoulder:active,.fb:active,.dp:active{filter:brightness(1.5)}
+.base{position:relative;background:linear-gradient(180deg,var(--shell),var(--shell-hi) 35%,var(--shell));border-radius:1.4cqw 1.4cqw 6cqw 6cqw;display:grid;grid-template-columns:1fr 46cqw 1fr;align-items:center;padding:3.6cqw 0 5cqw;box-shadow:inset 0 .3cqw 0 rgba(255,255,255,.04),0 1.4cqw 3cqw rgba(0,0,0,.5)}
+.bottom-bezel{background:var(--bezel);border-radius:1.3cqw;padding:.9cqw}
+.side{display:flex;flex-direction:column;align-items:center;gap:4.4cqw}
+.stick{position:relative;width:12cqw;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#121214 0 58%,#08080a 60% 70%,transparent 72%);display:grid;place-items:center}
+.stick::before{content:"";position:absolute;inset:.9cqw;border-radius:50%;border:.38cqw solid var(--acc);box-shadow:0 0 1.8cqw .2cqw var(--acc),inset 0 0 1.2cqw var(--acc);transition:border-color .4s,box-shadow .4s}
+.stick::after{content:"";position:relative;z-index:1;width:7cqw;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 40% 35%,#2a2b30,#121215 70%);box-shadow:0 .3cqw .6cqw rgba(0,0,0,.6)}
+.dpad{width:13cqw;aspect-ratio:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);filter:drop-shadow(0 .4cqw 0 rgba(0,0,0,.4))}
+.dp{border:0;padding:0;background:#151518;cursor:pointer;color:rgba(255,255,255,.2);font-size:1.6cqw}
+.dp.u{grid-area:1/2;border-radius:.8cqw .8cqw 0 0}.dp.l{grid-area:2/1;border-radius:.8cqw 0 0 .8cqw}.dp.r{grid-area:2/3;border-radius:0 .8cqw .8cqw 0}.dp.d{grid-area:3/2;border-radius:0 0 .8cqw .8cqw}
+.dpad .c{grid-area:2/2;background:#151518}
+.abxy{width:15cqw;aspect-ratio:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);place-items:center}
+.fb{width:4.6cqw;aspect-ratio:1;border-radius:50%;border:0;cursor:pointer;font:800 2.1cqw/1 var(--display);color:var(--bink);background:var(--btn);box-shadow:inset 0 -.35cqw 0 rgba(0,0,0,.4),0 .3cqw .6cqw rgba(0,0,0,.4);padding:0}
+.fb.x{grid-area:1/2}.fb.y{grid-area:2/1}.fb.a{grid-area:2/3}.fb.b{grid-area:3/2}
+.pill{position:absolute;bottom:2.4cqw;width:3cqw;aspect-ratio:1;border-radius:50%;background:var(--shell-lo);box-shadow:inset 0 .2cqw .3cqw rgba(0,0,0,.5)}
+.pill.l{left:9cqw}.pill.r{right:9cqw}
+.grille{position:absolute;bottom:2.9cqw;left:50%;transform:translateX(-50%);width:8cqw;height:1.4cqw;border-radius:1cqw;background:var(--shell-lo)}
+
+/* ───────── Screens: shared ───────── */
+.top-screen{container-type:inline-size;position:relative;aspect-ratio:16/9;overflow:hidden;overflow:clip;border-radius:.8cqw;background:#000;color:#f2f2f5;font-family:var(--ui)}
+.wall{position:absolute;top:0;bottom:0;left:0;width:115%;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.wall img{display:block;width:100%;height:100%;max-width:none;object-fit:cover}
+.track{position:absolute;inset:0;display:flex;transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.page{flex:0 0 100%;height:100%;position:relative}
+.grid{position:absolute;z-index:1;left:var(--gl);right:var(--gl);top:var(--gt);bottom:var(--gb);display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:var(--gap)}
+.tile{position:relative;min-width:0;min-height:0;cursor:pointer;transition:transform .2s ease,filter .25s ease}
+.clip{position:absolute;inset:0;overflow:hidden;border-radius:var(--r)}
+.art,.scene{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover}
+.scene{image-rendering:pixelated}
+.cap{position:absolute;left:.8cqw;bottom:.8cqw;font:700 .7cqw/1 var(--ui);letter-spacing:.06em;text-transform:uppercase;padding:.45cqw .7cqw;border-radius:.4cqw;background:rgba(0,0,0,.6);color:#fff}
+
+/* poster art for games */
+.poster{position:absolute;inset:0;color:#fff}
+.pbg{position:absolute;inset:0;background:radial-gradient(circle at 60% 32%,color-mix(in srgb,var(--c2) 50%,transparent),transparent 58%),linear-gradient(170deg,var(--c1),color-mix(in srgb,var(--c1) 45%,#000))}
+.psp{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);height:48%;max-width:none;image-rendering:pixelated;filter:drop-shadow(0 .4cqw 0 rgba(0,0,0,.35))}
+.poster.tall .psp{top:36%;height:auto;width:62%}
+.poster.wide .psp{left:28%;top:48%;height:62%}
+.pov{position:absolute;left:0;right:0;bottom:0;padding:2.4cqw .9cqw .8cqw;background:linear-gradient(transparent,rgba(0,0,0,.78))}
+.poster.wide .pov{left:auto;top:0;width:58%;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(90deg,transparent,rgba(0,0,0,.65) 35%)}
+.pchip{font:700 .58cqw/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;opacity:.75}
+.plogo{font:800 1.05cqw/1.08 var(--logo);margin-top:.35cqw;text-wrap:balance;text-shadow:0 .15cqw .5cqw rgba(0,0,0,.6);overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.poster.tall .plogo{font-size:1.25cqw}
+.poster.wide .plogo,.poster.big .plogo{font-size:1.6cqw}
+.chip{position:absolute;top:.9cqw;right:.9cqw;z-index:2;font:800 .66cqw/1 var(--ui);letter-spacing:.08em;text-transform:uppercase;padding:.45cqw .7cqw;border-radius:.45cqw;background:var(--acc);color:#fff}
+.mini{position:relative;border-radius:.35cqw;overflow:hidden;background:radial-gradient(circle at 65% 35%,color-mix(in srgb,var(--c2) 40%,transparent),transparent 65%),var(--c1);display:grid;place-items:center;box-shadow:0 .2cqw .5cqw rgba(0,0,0,.4)}
+.mini img{width:58%;image-rendering:pixelated}
+
+/* widgets (shared bones, styled per concept below) */
+.clk{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 1.2cqw}
+.clk-t{font:700 3cqw/1 var(--ui);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.clk-d{font:500 .85cqw/1.2 var(--ui);opacity:.7;margin-top:.4cqw}
+.nomedia{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5cqw;font:500 .85cqw var(--ui);color:#9a9aa3}
+.nomedia svg{width:1.6cqw;height:1.6cqw}
+.mus{position:absolute;inset:0;padding:1cqw;display:flex;gap:1cqw}
+.mus-art{height:100%;aspect-ratio:1;flex:none;display:grid}
+.mus-m{flex:1;min-width:0;display:flex;flex-direction:column}
+.mus-l{font:700 .66cqw/1 var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--acc-hi)}
+.mus-t{font:700 1.1cqw/1.15 var(--ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.4cqw}
+.mus-a{font-size:.76cqw;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mus-p{height:.3cqw;background:rgba(255,255,255,.12);border-radius:1cqw;margin-top:auto;overflow:hidden}
+.mus-p i{display:block;height:100%;background:var(--acc)}
+.mus-ctl{display:flex;gap:.55cqw;align-items:center;margin-top:.55cqw}
+.mus-ctl button{width:1.9cqw;height:1.9cqw;border-radius:50%;border:0;background:rgba(255,255,255,.1);color:#fff;display:grid;place-items:center;padding:0;cursor:pointer}
+.mus-ctl button.play{background:var(--acc);width:2.3cqw;height:2.3cqw}
+.mus-ctl svg{width:52%;height:52%}
+.ptw{position:absolute;inset:0;padding:1cqw 1.2cqw .8cqw;display:flex;flex-direction:column}
+.ptw-n{font:700 1.9cqw/1 var(--ui);color:var(--acc-hi);font-variant-numeric:tabular-nums}
+.ptw-l{font:600 .85cqw/1.2 var(--ui);opacity:.85;margin-top:.2cqw}
+.ptw-bars{flex:1;display:flex;align-items:flex-end;min-height:0;margin-top:.5cqw}
+.ptw-bars i{flex:1;background:color-mix(in srgb,var(--acc) 55%,transparent);border-radius:.25cqw .25cqw 0 0;min-height:.15cqw}
+.ptw-bars i.today{background:var(--acc)}
+.ptw-days{display:flex;margin-top:.35cqw}
+.ptw-days span{flex:1;text-align:center;font:600 .58cqw/1 var(--ui);opacity:.65}
+.ptw-days span.today{color:var(--acc-hi);opacity:1}
+.rec{position:absolute;inset:0;padding:1cqw 1.1cqw;display:flex;flex-direction:column;gap:.6cqw}
+.rec-l{font:700 .66cqw/1 var(--ui);letter-spacing:.1em;text-transform:uppercase;opacity:.7}
+.rec-row{flex:1;display:flex;gap:.8cqw;min-height:0}
+.rec-row .mini{flex:1;min-width:0}
+.rnd{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5cqw;text-align:center;padding:.8cqw}
+.rnd img{width:3.6cqw;image-rendering:pixelated;filter:drop-shadow(0 0 .8cqw var(--acc))}
+.rnd-l{font:700 .9cqw/1.15 var(--ui)}
+.rnd-s{font-size:.7cqw;opacity:.6}
+.roll-chip{position:absolute;left:50%;bottom:.7cqw;transform:translateX(-50%);z-index:3;font:800 .66cqw/1 var(--ui);padding:.4cqw .7cqw;border-radius:2cqw;background:var(--acc);color:#fff;white-space:nowrap}
+.aw{position:absolute;inset:0;padding:1cqw 1.1cqw;display:flex;flex-direction:column}
+.aw-top{display:flex;justify-content:space-between;align-items:center;font:700 .7cqw/1 var(--ui);opacity:.8}
+.aw-top svg{width:1.6cqw;height:1.6cqw;color:var(--acc-hi)}
+.aw-big{font:700 2.6cqw/1 var(--ui);margin-top:auto}
+.aw-s{font-size:.72cqw;opacity:.7}
+.app{position:absolute;inset:0;background:var(--ac);color:var(--af);display:grid;place-items:center}
+.app.pat{background:radial-gradient(circle,rgba(255,255,255,.07) 24%,transparent 26%) 0 0/2.6cqw 2.6cqw,var(--ac)}
+.app svg{width:38%;max-width:5cqw;height:auto}
+.app-n{position:absolute;left:.9cqw;bottom:.8cqw;font:700 .9cqw/1 var(--ui)}
+
+/* overlays */
+.ov{position:absolute;inset:0;z-index:8;pointer-events:none}
+.ov>*{pointer-events:auto}
+.fview{position:absolute;left:2cqw;right:2cqw;top:4.4cqw;bottom:4.4cqw;border-radius:1.2cqw;background:rgba(6,6,8,.94);border:.1cqw solid color-mix(in srgb,var(--acc) 45%,transparent);box-shadow:0 0 3cqw color-mix(in srgb,var(--acc) 25%,transparent);display:flex;flex-direction:column;overflow:hidden;animation:pop .22s ease-out}
+@keyframes pop{from{opacity:0;transform:scale(.97)}}
+.fv-h{display:flex;align-items:end;gap:1.5cqw;padding:1.3cqw 1.6cqw 1cqw;border-bottom:.1cqw solid rgba(255,255,255,.08)}
+.fv-k{font:700 .7cqw/1 var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--acc-hi)}
+.fv-t{font:800 2cqw/1 var(--logo);margin-top:.5cqw}
+.fv-h code{font:600 .85cqw/1 var(--mono);padding:.45cqw .7cqw;border-radius:.5cqw;background:rgba(255,255,255,.06);color:#ddd}
+.fv-h .n{margin-left:auto;font:700 .9cqw var(--ui);opacity:.6}
+.fv-g{flex:1;overflow:auto;padding:1.3cqw 1.6cqw 1.6cqw;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1cqw;align-content:start}
+.fv-i{position:relative;height:0;padding-bottom:133%;border-radius:.6cqw;overflow:hidden;cursor:pointer;filter:brightness(.6)}
+.fv-i.focus{filter:none;outline:.3cqw solid var(--acc);outline-offset:.25cqw;box-shadow:0 0 1.6cqw var(--acc)}
+.launch{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,color-mix(in srgb,var(--acc) 22%,#000),#000 70%);color:#fff;display:grid;place-items:center;text-align:center;animation:pop .25s ease-out}
+.launch .l-cv{position:relative;width:12cqw;aspect-ratio:3/4;border-radius:1cqw;overflow:hidden;margin:0 auto 1.6cqw;box-shadow:0 0 4cqw color-mix(in srgb,var(--acc) 50%,transparent)}
+.launch .l-t{font:800 2.2cqw/1.1 var(--logo)}
+.launch .l-s{font-size:1cqw;opacity:.7;margin-top:.5cqw}
+.launch .l-bar{width:22cqw;height:.3cqw;border-radius:1cqw;background:rgba(255,255,255,.12);margin:1.3cqw auto 0;overflow:hidden}
+.launch .l-bar i{display:block;height:100%;width:100%;background:var(--acc);transform-origin:left;animation:load 1.6s ease-in-out forwards}
+@keyframes load{from{transform:scaleX(0)}}
+.toast{position:absolute;left:50%;bottom:5cqw;transform:translateX(-50%);z-index:9;background:rgba(0,0,0,.9);border:.1cqw solid var(--acc);color:#fff;font:600 .95cqw/1.2 var(--ui);padding:.8cqw 1.4cqw;border-radius:2cqw;white-space:nowrap;animation:pop .2s ease-out}
+
+/* bottom screen: shared */
+.bottom-screen{container-type:inline-size;position:relative;aspect-ratio:1240/1080;overflow:hidden;overflow:clip;border-radius:.6cqw;background:#000;color:#f2f2f5;font-family:var(--ui)}
+.bs{position:absolute;inset:0}
+.bs-bg{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover}
+.bs-status{position:absolute;top:3cqw;right:3cqw;z-index:3;display:flex;align-items:center;gap:1.4cqw;padding:1.1cqw 2.2cqw;border-radius:5cqw;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.12);font:700 2.3cqw/1 var(--ui);font-variant-numeric:tabular-nums}
+.bs-status svg{width:2.6cqw;height:2.6cqw}
+.bs-status .bat{color:var(--acc-hi)}
+.bs-hints{position:absolute;left:0;right:0;bottom:0;z-index:3;display:flex;justify-content:flex-end;gap:3.2cqw;padding:2.6cqw 3.6cqw;font:700 2.4cqw/1 var(--ui);white-space:nowrap}
+.g{display:inline-grid;place-items:center;width:4cqw;height:4cqw;border-radius:50%;font:800 2.1cqw/1 var(--display);color:#fff;background:#1a1a1e;border:.25cqw solid var(--acc);margin-right:1cqw;vertical-align:middle}
+.bs-logo{font:400 7cqw/1.02 var(--logo);text-wrap:balance}
+.bs-meta{font:600 2.6cqw/1.4 var(--ui);opacity:.8;margin-top:1.6cqw}
+.bs-rows{margin:3cqw 0 0;display:grid;gap:0;font-size:2.7cqw}
+.bs-rows div{display:flex;justify-content:space-between;gap:3cqw;padding:1.5cqw 0;border-bottom:1px solid rgba(255,255,255,.1)}
+.bs-rows dt{opacity:.6}.bs-rows dd{margin:0;font-weight:700;text-align:right}
+.bs-minis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1.6cqw;margin-top:3cqw}
+.bs-minis .mini{aspect-ratio:1;border-radius:1cqw}
+
+/* ═════════ Concept: Crimson Web ═════════ */
+[data-style="crimson"]{--ui:"Rubik",var(--body);--logo:"Bungee",var(--display);--r:.9cqw;--gl:2.6cqw;--gt:2.6cqw;--gb:4.2cqw;--gap:1.1cqw}
+[data-style="crimson"] .tile.focus::after{content:"";position:absolute;inset:-.55cqw;z-index:6;pointer-events:none;--k:var(--acc-hi);
+  background:linear-gradient(var(--k),var(--k)) 0 0/1.6cqw .35cqw no-repeat,linear-gradient(var(--k),var(--k)) 0 0/.35cqw 1.6cqw no-repeat,
+  linear-gradient(var(--k),var(--k)) 100% 0/1.6cqw .35cqw no-repeat,linear-gradient(var(--k),var(--k)) 100% 0/.35cqw 1.6cqw no-repeat,
+  linear-gradient(var(--k),var(--k)) 0 100%/1.6cqw .35cqw no-repeat,linear-gradient(var(--k),var(--k)) 0 100%/.35cqw 1.6cqw no-repeat,
+  linear-gradient(var(--k),var(--k)) 100% 100%/1.6cqw .35cqw no-repeat,linear-gradient(var(--k),var(--k)) 100% 100%/.35cqw 1.6cqw no-repeat;
+  filter:drop-shadow(0 0 .5cqw var(--acc))}
+[data-style="crimson"] .tile.focus{transform:scale(1.04);z-index:3}
+[data-style="crimson"] .k-clock .clip,[data-style="crimson"] .k-playtime .clip{border:.12cqw solid color-mix(in srgb,var(--acc-hi) 70%,transparent);background:rgba(0,0,0,.55)}
+[data-style="crimson"] .clk-t{color:var(--acc-hi);font-weight:500;font-size:2.7cqw}
+[data-style="crimson"] .k-music .clip,[data-style="crimson"] .k-recent .clip,[data-style="crimson"] .k-random .clip,[data-style="crimson"] .k-android .clip{background:rgba(14,12,14,.92)}
+[data-style="crimson"] .t-art .clip{border-radius:.6cqw}
+.ico{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:88%;max-width:100%;aspect-ratio:1;padding:.5cqw;border-radius:1cqw;
+  background:radial-gradient(circle at 30% 30%,var(--acc-hi) 0 .22cqw,transparent .27cqw) 0 0/1.2cqw 1.2cqw,radial-gradient(circle at 75% 70%,#fff 0 .14cqw,transparent .19cqw) 0 0/1.2cqw 1.2cqw,var(--acc);box-shadow:0 0 1.4cqw color-mix(in srgb,var(--acc) 40%,transparent)}
+.ico-in{width:100%;height:100%;border-radius:.55cqw;overflow:hidden;display:grid;place-items:center;background:radial-gradient(circle at 65% 35%,color-mix(in srgb,var(--c2) 45%,transparent),transparent 65%),var(--c1)}
+.ico-in img{width:60%;image-rendering:pixelated}
+.ico-in svg{width:52%;height:auto;color:var(--af)}
+.cf{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4cqw}
+.cf-box{height:76%;aspect-ratio:1;padding:.45cqw;border-radius:1cqw;display:grid;grid-template-columns:1fr 1fr;gap:.35cqw;background:radial-gradient(circle at 30% 30%,var(--acc-hi) 0 .22cqw,transparent .27cqw) 0 0/1.2cqw 1.2cqw,color-mix(in srgb,var(--acc) 80%,#000)}
+.cf.w .cf-box{aspect-ratio:auto;width:94%;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr}
+.cf-box .mini{border-radius:.3cqw}
+.cf-n{font:700 .8cqw/1 var(--ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.c-pager{position:absolute;z-index:6;left:50%;bottom:1.4cqw;transform:translateX(-50%);display:flex;gap:.4cqw;align-items:center}
+.c-pager i{width:2cqw;height:.3cqw;border-radius:1cqw;background:rgba(255,255,255,.25)}
+.c-pager i.on{width:5cqw;background:#fff}
+.c-name{position:absolute;z-index:6;left:2.6cqw;bottom:1cqw;font:600 .85cqw/1 var(--ui);color:rgba(255,255,255,.6)}
+.c-name b{color:#fff;font-weight:700}
+[data-style="crimson"] .bs-text{position:absolute;left:0;right:0;top:50%;transform:translateY(-55%);z-index:2;text-align:center;padding:0 6cqw}
+[data-style="crimson"] .bs-logo{background:linear-gradient(180deg,#fff 0 45%,var(--acc-hi) 55%,var(--acc));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 .5cqw 0 #000) drop-shadow(0 0 2cqw color-mix(in srgb,var(--acc) 60%,transparent))}
+
+/* ═════════ Concept: Night Pinboard ═════════ */
+[data-style="pinboard"]{--ui:"Lexend",var(--body);--logo:"Lexend",var(--display);--r:1cqw;--gl:4.2cqw;--gt:5.4cqw;--gb:5.6cqw;--gap:1.3cqw}
+[data-style="pinboard"] .tile .clip{border:.32cqw solid #e6e6ec;background:#141418}
+[data-style="pinboard"] .tile::before{content:"";position:absolute;z-index:4;left:-.45cqw;top:-.45cqw;width:1.15cqw;height:1.15cqw;border-radius:.3cqw;background:#e6e6ec;box-shadow:0 .1cqw .3cqw rgba(0,0,0,.6);transition:background .2s}
+[data-style="pinboard"] .tile.focus{transform:scale(1.05) rotate(-.6deg);z-index:3}
+[data-style="pinboard"] .tile.focus .clip{border-color:var(--acc-hi);box-shadow:0 0 0 .15cqw var(--acc),0 0 2.4cqw color-mix(in srgb,var(--acc) 60%,transparent)}
+[data-style="pinboard"] .tile.focus::before{background:var(--acc)}
+[data-style="pinboard"] .plogo{font-weight:700;letter-spacing:-.01em}
+[data-style="pinboard"] .clk-t{font-weight:600}
+.pbf{position:absolute;inset:0;display:flex;flex-direction:column;padding:1cqw}
+.fan{flex:1;position:relative;min-height:0}
+.fan .mini{position:absolute;top:4%;height:86%;aspect-ratio:3/4;left:50%}
+.fan .mini:nth-child(1){transform:translateX(-100%) rotate(-10deg);z-index:1}
+.fan .mini:nth-child(2){transform:translateX(-50%) translateY(-4%);z-index:3}
+.fan .mini:nth-child(3){transform:translateX(0) rotate(10deg);z-index:2}
+.fan.row{display:flex;gap:.6cqw}
+.fan.row .mini{position:static;transform:none;height:100%}
+.pbf-n{display:flex;justify-content:space-between;gap:.6cqw;font:700 .9cqw/1.1 var(--ui);margin-top:.6cqw;white-space:nowrap}
+.pbf-n span{color:var(--acc-hi);font-weight:600}
+.pb-top{position:absolute;z-index:6;top:1.2cqw;left:2.4cqw;right:2.4cqw;display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+.pb-tag{justify-self:start;font:700 .85cqw/1 var(--ui);padding:.6cqw 1cqw;border-radius:.6cqw;background:#e6e6ec;color:#111}
+.pb-dots{display:flex;gap:.45cqw;padding:.55cqw .9cqw;border-radius:2cqw;background:#0e0e12;border:.15cqw solid #e6e6ec}
+.pb-dots i{width:.55cqw;height:.55cqw;border-radius:50%;background:#55555f}
+.pb-dots i.on{background:var(--acc-hi);box-shadow:0 0 .6cqw var(--acc)}
+.pb-sys{justify-self:end;display:flex;align-items:center;gap:.8cqw;padding:.45cqw .5cqw .45cqw 1cqw;border-radius:2cqw;background:#e6e6ec;color:#111;font:700 .85cqw/1 var(--ui);font-variant-numeric:tabular-nums}
+.pb-sys .av{width:1.9cqw;height:1.9cqw;border-radius:50%;background:var(--acc);display:grid;place-items:center;color:#fff;font-size:.8cqw}
+.pb-arrow{position:absolute;z-index:6;top:50%;transform:translateY(-50%);width:2cqw;height:4cqw;border:0;background:transparent;color:#e6e6ec;font:700 2.2cqw/1 var(--ui);cursor:pointer;padding:0}
+.pb-arrow.l{left:1cqw}.pb-arrow.r{right:1cqw}
+.pb-arrow[hidden]{display:none}
+.pb-bot{position:absolute;z-index:6;bottom:1.1cqw;left:2.4cqw;right:2.4cqw;display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+.pb-h{display:flex;flex-direction:column;gap:.3cqw;font:600 .72cqw/1.2 var(--ui);color:#cfcfd8}
+.pb-h.r{justify-self:end;align-items:flex-end}
+.pb-h b{display:inline-grid;place-items:center;width:1.3cqw;height:1.3cqw;border-radius:50%;background:#e6e6ec;color:#111;font-size:.65cqw;margin-right:.35cqw}
+.pb-dock{display:flex;gap:.5cqw;padding:.5cqw;border-radius:1.2cqw;background:#e6e6ec}
+.pb-dock button{width:3cqw;height:2.6cqw;border-radius:.7cqw;border:0;background:transparent;color:#222;display:grid;place-items:center;cursor:pointer;padding:0}
+.pb-dock button.on{background:#111;color:var(--acc-hi);box-shadow:0 0 .8cqw color-mix(in srgb,var(--acc) 50%,transparent)}
+.pb-dock svg{width:1.5cqw;height:1.5cqw}
+[data-style="pinboard"] .bs-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.1),transparent 30%,rgba(0,0,0,.85) 78%);z-index:1}
+[data-style="pinboard"] .bs-art{position:absolute;inset:0}
+[data-style="pinboard"] .bs-art .poster .pov{display:none}
+[data-style="pinboard"] .bs-text{position:absolute;left:5cqw;right:5cqw;bottom:12cqw;z-index:2}
+[data-style="pinboard"] .bs-logo{font-weight:700;font-size:6.4cqw;letter-spacing:-.02em;text-shadow:0 .4cqw 1.6cqw rgba(0,0,0,.8)}
+[data-style="pinboard"] .bs-tag{display:inline-block;font:700 2.1cqw/1 var(--ui);padding:1cqw 1.6cqw;border-radius:1cqw;background:var(--acc);margin-bottom:2cqw}
+
+/* ═════════ Concept: Poster Wall ═════════ */
+[data-style="poster"]{--ui:"Manrope",var(--body);--logo:"Big Shoulders Display",var(--display);--r:.5cqw;--gl:2.4cqw;--gt:6.4cqw;--gb:3.2cqw;--gap:.9cqw}
+[data-style="poster"] .tile{filter:brightness(.5) saturate(.75)}
+[data-style="poster"] .tile.focus{filter:none;transform:translateY(-.6cqw);z-index:3}
+[data-style="poster"] .tile.focus::after{content:"";position:absolute;left:12%;right:12%;bottom:-1.1cqw;height:.3cqw;border-radius:1cqw;background:var(--acc);box-shadow:0 0 1.2cqw .2cqw var(--acc)}
+[data-style="poster"] .tile.focus .clip{box-shadow:0 0 3cqw color-mix(in srgb,var(--acc) 35%,transparent)}
+[data-style="poster"] .k-clock,[data-style="poster"] .k-playtime{filter:none}
+[data-style="poster"] .k-clock .clk{padding:0}
+[data-style="poster"] .clk-t{font:500 5.6cqw/.9 var(--logo);letter-spacing:0}
+[data-style="poster"] .clk-d{font:600 .9cqw var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--acc-hi);opacity:1}
+[data-style="poster"] .k-music .clip,[data-style="poster"] .k-recent .clip,[data-style="poster"] .k-random .clip,[data-style="poster"] .k-android .clip{background:#0b0b0d;border:.1cqw solid #1c1c21}
+[data-style="poster"] .ptw-n{font:800 2.6cqw/1 var(--logo)}
+[data-style="poster"] .plogo{font:800 1.5cqw/1 var(--logo);text-transform:uppercase;letter-spacing:.01em}
+[data-style="poster"] .poster.tall .plogo{font-size:1.9cqw}
+.pf{position:absolute;inset:0;background:linear-gradient(170deg,color-mix(in srgb,var(--c1) 70%,#000),#000);display:flex;flex-direction:column;padding:1.1cqw}
+.pf-st{flex:1;display:grid;grid-template-columns:1fr;gap:.6cqw;align-content:center;min-height:0}
+.pf.w .pf-st{grid-template-columns:1fr 1fr}
+.pf-st .mini{aspect-ratio:16/10}
+.pf-n{font:800 1.9cqw/.95 var(--logo);text-transform:uppercase;margin-top:.8cqw}
+.pf-c{font:600 .72cqw var(--ui);color:var(--acc-hi);margin-top:.3cqw}
+.po-top{position:absolute;z-index:6;top:1.6cqw;left:2.4cqw;right:2.4cqw;display:flex;align-items:baseline;gap:1.4cqw}
+.po-name{font:800 2.8cqw/1 var(--logo);text-transform:uppercase;letter-spacing:.01em}
+.po-ix{font:600 .9cqw var(--mono);color:var(--acc-hi)}
+.po-tabs{display:flex;gap:1.2cqw;margin-left:2cqw;font:700 .8cqw var(--ui);letter-spacing:.12em;text-transform:uppercase}
+.po-tabs button{border:0;background:none;color:rgba(255,255,255,.35);font:inherit;letter-spacing:inherit;cursor:pointer;padding:0}
+.po-tabs button.on{color:#fff}
+.po-time{margin-left:auto;font:700 1cqw var(--ui);font-variant-numeric:tabular-nums;color:rgba(255,255,255,.75)}
+.po-line{position:absolute;z-index:6;left:2.4cqw;right:2.4cqw;bottom:1.2cqw;height:.18cqw;background:rgba(255,255,255,.1);border-radius:1cqw}
+.po-line i{position:absolute;top:0;bottom:0;border-radius:1cqw;background:var(--acc);box-shadow:0 0 .8cqw var(--acc);transition:left .45s cubic-bezier(.2,.8,.2,1)}
+[data-style="poster"] .bs-cv{position:absolute;left:5cqw;top:6cqw;width:36cqw;aspect-ratio:3/4;border-radius:1.4cqw;overflow:hidden;box-shadow:0 0 6cqw color-mix(in srgb,var(--acc) 30%,transparent)}
+[data-style="poster"] .bs-cv .pov{display:none}
+[data-style="poster"] .bs-side{position:absolute;left:46cqw;right:5cqw;top:6cqw;bottom:12cqw;display:flex;flex-direction:column}
+[data-style="poster"] .bs-k{font:700 2.2cqw/1 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--acc-hi)}
+[data-style="poster"] .bs-logo{font:800 8cqw/.92 var(--logo);text-transform:uppercase;margin-top:1.4cqw}
+[data-style="poster"] .bs-glow{position:absolute;left:0;right:0;bottom:0;height:40%;background:radial-gradient(ellipse 70% 100% at 50% 100%,color-mix(in srgb,var(--acc) 22%,transparent),transparent 70%)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap" id="wrap">
+  <header class="masthead">
+    <div><div class="eyebrow-l" id="eyebrow"></div><h1 id="h1"></h1></div>
+    <p id="blurb"></p>
+  </header>
+  <div class="controls">
+    <span class="lab">Accent</span>
+    <div class="swatches" id="swatches"></div>
+    <div class="keys"><span><kbd>←↑→↓</kbd> move</span><span><kbd>Enter</kbd> A</span><span><kbd>Esc</kbd> B</span><span><kbd>X</kbd> favourite</span><span><kbd>Y</kbd> details</span><span><kbd>Q</kbd><kbd>E</kbd> L1/R1</span></div>
+  </div>
+  <div class="thor" id="thor" tabindex="0">
+    <div class="lid"><div class="bezel"><div class="top-screen" id="top"><div class="wall"><img alt="" id="wallimg"></div><div class="track" id="track"></div><div id="chrome"></div><div class="ov" id="ov"></div></div></div></div>
+    <div class="hingerow"><button class="shoulder" data-btn="L" aria-label="L1, previous page">L1</button><div class="hinge"></div><button class="shoulder" data-btn="R" aria-label="R1, next page">R1</button></div>
+    <div class="base">
+      <div class="side"><div class="stick" aria-hidden="true"></div><div class="dpad"><button class="dp u" data-btn="up" aria-label="Up">▲</button><button class="dp l" data-btn="left" aria-label="Left">◀</button><div class="c"></div><button class="dp r" data-btn="right" aria-label="Right">▶</button><button class="dp d" data-btn="down" aria-label="Down">▼</button></div></div>
+      <div class="bottom-bezel"><div class="bottom-screen" id="bottom"></div></div>
+      <div class="side"><div class="abxy"><button class="fb x" data-btn="X">X</button><button class="fb y" data-btn="Y">Y</button><button class="fb a" data-btn="A">A</button><button class="fb b" data-btn="B">B</button></div><div class="stick" aria-hidden="true"></div></div>
+      <span class="pill l" aria-hidden="true"></span><span class="grille" aria-hidden="true"></span><span class="pill r" aria-hidden="true"></span>
+    </div>
+  </div>
+  <p class="hintline" id="kbhint"></p>
+  <section class="notes" id="notes"></section>
+</div>
+
+<script>
+(() => {
+'use strict';
+const KEY = 'crimson';
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ───── Accents (stick LEDs + every tinted image follow these) ───── */
+const ACCENTS = {
+  crimson:{n:'Crimson',acc:'#ff2a45',hi:'#ff8a9b',lo:'#4a0410'},
+  oxblood:{n:'Oxblood',acc:'#a80f26',hi:'#e2546a',lo:'#220106'},
+  violet:{n:'Violet',acc:'#9b5cff',hi:'#cdb2ff',lo:'#1c0a42'},
+  ultraviolet:{n:'Ultraviolet',acc:'#5a2bff',hi:'#a592ff',lo:'#0c0433'}
+};
+
+/* ───── Library ───── */
+const PLAT = {
+  NES:{n:'NES',emu:'Mesen'},SNES:{n:'Super NES',emu:'Snes9x'},N64:{n:'Nintendo 64',emu:'Mupen64Plus FZ'},GC:{n:'GameCube',emu:'Dolphin'},Wii:{n:'Wii',emu:'Dolphin'},
+  GBC:{n:'Game Boy Color',emu:'mGBA'},GBA:{n:'Game Boy Advance',emu:'mGBA'},DS:{n:'Nintendo DS',emu:'melonDS'},'3DS':{n:'Nintendo 3DS',emu:'Azahar'},
+  PS1:{n:'PlayStation',emu:'DuckStation'},PS2:{n:'PlayStation 2',emu:'NetherSX2'},PSP:{n:'PSP',emu:'PPSSPP'},ARC:{n:'Arcade',emu:'FinalBurn Neo'},NEOGEO:{n:'Neo Geo',emu:'FinalBurn Neo'},AND:{n:'Android',emu:'Android app'}
+};
+// id, title, platform, genre, year, colour, accent, sprite, minutes played, minutes since last played, favourite, scene
+const ROWS = [
+ ['smw','Super Mario World','SNES','Platformer',1990,'#3fae49','#f6d743','star',880,4300,1],
+ ['ct','Chrono Trigger','SNES','RPG',1995,'#2a4b8d','#e9c46a','sword',1500,0,1],
+ ['sm','Super Metroid','SNES','Action',1994,'#2d1b4e','#f07a2b','bolt',530,0,1],
+ ['sm64','Super Mario 64','N64','Platformer',1996,'#c62d2d','#f6d743','star',960,190,1],
+ ['oot','Zelda: Ocarina of Time','N64','Adventure',1998,'#1c5a3a','#e8c547','sword',1900,0,1],
+ ['sms','Super Mario Sunshine','GC','Platformer',2002,'#1ca3d9','#f7c948','star',252,120,1,'isle'],
+ ['mkdd','Mario Kart: Double Dash!!','GC','Racing',2003,'#e2492f','#f6d743','flag',410,3100,0],
+ ['ww','Zelda: The Wind Waker','GC','Adventure',2002,'#1e6fb8','#f1d36b','sword',2310,1500,1,'sea'],
+ ['mp1','Metroid Prime','GC','Action',2002,'#3a2a14','#f08a24','bolt',1240,0,1],
+ ['ssbm','Super Smash Bros. Melee','GC','Fighting',2001,'#6d6d78','#e63946','burst',2600,5000,1],
+ ['re4','Resident Evil 4','GC','Action',2005,'#3c1212','#d9c58c','bolt',700,0,0],
+ ['tos','Tales of Symphonia','GC','RPG',2003,'#2b3f8c','#f2b84b','sword',2700,0,0],
+ ['ika','Ikaruga','GC','Shmup',2002,'#0d0d0f','#e8e8e8','ship',20,0,0],
+ ['smg','Super Mario Galaxy','Wii','Platformer',2007,'#141a46','#f6d743','star',1340,2100,1,'space'],
+ ['mkw','Mario Kart Wii','Wii','Racing',2008,'#d22f2f','#ffffff','flag',820,0,1],
+ ['xeno','Xenoblade Chronicles','Wii','RPG',2010,'#20406b','#d9e8f5','sword',4200,0,1],
+ ['pkc','Pokémon Crystal','GBC','RPG',2000,'#2bb3c0','#f2f2f2','ball',2400,0,1],
+ ['aos','Castlevania: Aria of Sorrow','GBA','Action',2003,'#2a0f1e','#c9b27a','sword',480,0,1],
+ ['mcap','Zelda: The Minish Cap','GBA','Adventure',2004,'#2f7a3a','#f2e6a6','sword',520,0,0],
+ ['mkds','Mario Kart DS','DS','Racing',2005,'#e52521','#f6d743','flag',410,0,1],
+ ['twewy','The World Ends with You','DS','RPG',2007,'#141414','#e94f9b','note',25,0,1],
+ ['albw','Zelda: A Link Between Worlds','3DS','Adventure',2013,'#6b2d8f','#f2d14b','sword',690,0,0],
+ ['ff7','Final Fantasy VII','PS1','RPG',1997,'#e8e8e8','#1f4f9a','sword',3100,0,1],
+ ['sotn','Symphony of the Night','PS1','Action',1997,'#1a0f0f','#c0392b','sword',640,0,0],
+ ['p4','Persona 4','PS2','RPG',2008,'#f6d200','#111111','note',8,0,0],
+ ['mhfu','Monster Hunter Freedom Unite','PSP','Action',2009,'#5a3a1a','#e8b04a','sword',5200,0,0],
+ ['sf2',"Street Fighter II' Champion Edition",'ARC','Fighting',1992,'#1a1a8c','#f2c200','burst',780,600,1],
+ ['ddp','DoDonPachi','ARC','Shmup',1997,'#1a0a0a','#f23c3c','ship',240,0,1],
+ ['ms','Metal Slug','NEOGEO','Run & gun',1996,'#6b5a2a','#e8d9a8','bolt',300,3000,1],
+ ['pb','Puzzle Bobble','NEOGEO','Puzzle',1994,'#8fd3ff','#f24b8c','ball',500,0,1],
+ ['zzz','Zenless Zone Zero','AND','Action',2024,'#151515','#f2e04b','bolt',1600,1440,0],
+ ['dc','Dead Cells','AND','Action',2018,'#1a2a3a','#f25c2b','sword',700,0,0],
+ ['sdv','Stardew Valley','AND','Sim',2016,'#5aa84a','#f2d27a','leaf',3000,0,1],
+ ['bal','Balatro','AND','Card',2024,'#2a4a3a','#e84a4a','card',1300,250,1],
+ ['vs','Vampire Survivors','AND','Action',2022,'#2a0a0a','#e8c84b','bolt',900,0,0],
+ ['mc','Minecraft','AND','Sandbox',2011,'#5a8a3a','#8a5a3a','leaf',2100,0,0]
+];
+const NOW0 = Date.now();
+const LIB = ROWS.map(r => ({id:r[0],t:r[1],p:r[2],g:r[3],y:r[4],c1:r[5],c2:r[6],spr:r[7],pt:r[8],lastAt:r[9]?NOW0-r[9]*60000:null,fav:!!r[10],scene:r[11]||null}));
+const byId = {}; LIB.forEach(g => byId[g.id] = g);
+const SPR = {
+ star:["....1....","...111...","...111...","111111111",".1131311.","..11111..",".1111111.",".111.111.","11.....11"],
+ burst:["1...1...1",".1..1..1.","..11111..","..12221..","111222111","..12221..","..11111..",".1..1..1.","1...1...1"],
+ ship:["....1....","....1....","...121...","...131...","1..111..1","11.111.11","111111111","1.11.11.1","...2.2..."],
+ sword:[".......11","......121",".....121.","....121..","3..121...",".3121....","..33.....",".3.3.....","3........"],
+ flag:["3........","3121212..","3212121..","3121212..","3212121..","3........","3........","3........","3........"],
+ ball:["..11111..",".1221111.","112111111","111111111","111111111","111111111","111111111",".1111111.","..11111.."],
+ note:["...111111","...1....1","...1....1","...1....1",".111..111","1111.1111",".11...11."],
+ leaf:["......111","....11221","...112211","..1122111",".1121111.",".121111..","..1111...",".3.......","3........"],
+ bolt:[".....111.","....111..","...111...","..111111.",".111111..","....11...","...11....","..11.....",".1......."],
+ dice:["222222222","232222232","222222222","222232222","222222222","232222232","222222222"],
+ card:[".2222222.",".2122122.",".2111112.",".2111112.",".2211122.",".2221222.",".2222222."]
+};
+const APPS = {
+  store:{n:'Game Store',c:'#14171d',f:'#c9d6e2',g:'bag',pat:true},
+  remote:{n:'Remote Play',c:'#1b3fd6',f:'#ffffff',g:'stream'},
+  video:{n:'Video',c:'#ff5a1f',f:'#ffffff',g:'play'},
+  pad:{n:'Controller',c:'#1e1f25',f:'#e8e8ee',g:'pad'},
+  music:{n:'Music',c:'#6d28d9',f:'#ffffff',g:'note'}
+};
+const ARTNAMES = {eclipse:'Eclipse',bat:'Night watch',web:'Web',palms:'Palm drive',rain:'Rain alley',moon:'Crescent',blossom:'Night blossom'};
+const TRACKS = [{t:'Delfino Plaza',a:'Super Mario Sunshine',len:174,g:'sms'},{t:'Gusty Garden Galaxy',a:'Super Mario Galaxy',len:192,g:'smg'},{t:'Dragon Roost Island',a:'Zelda: The Wind Waker',len:165,g:'ww'},{t:'Corridors of Time',a:'Chrono Trigger',len:150,g:'ct'},{t:"Guile's Theme",a:'Street Fighter II',len:130,g:'sf2'}];
+const RULES = {fav:'Favourites',random:'Random',android:'Android games',emu:'Emulator',console:'Console',genre:'Genre',regex:'Custom regex',unplayed:'Never played'};
+const WIDGETS = {clock:'Clock',recent:'Recently played',music:'Music player',lastImage:'Last played',random:'Random game',playtime:'Playtime',android:'Android widget'};
+const WDESC = {clock:'Time and date.',recent:'Your last few games, newest first.',music:'Controls whatever Android is playing.',lastImage:'Big artwork of the game you played last. A resumes it.',random:'A rolls a game, A again plays it, B clears.',playtime:'Time played this week.',android:'A widget from an installed app, hosted in a tile.'};
+
+/* ───── Concepts ───── */
+const T = (id,type,x,y,w,h,extra={}) => Object.assign({id,type,x,y,w,h}, extra);
+const G = (id,game,x,y,w=1,h=1) => T(id,'game',x,y,w,h,{game});
+const A = (id,art,x,y,w,h,caption) => T(id,'art',x,y,w,h,{art,caption});
+const P = (id,app,x,y,w=1,h=1) => T(id,'app',x,y,w,h,{app});
+const W = (id,kind,x,y,w,h,extra) => T(id,'widget',x,y,w,h,Object.assign({kind},extra));
+const F = (id,name,rule,x,y,w=1,h=1) => T(id,'folder',x,y,w,h,{name,rule});
+const CONCEPTS = {
+ crimson:{style:'crimson', name:'Crimson Web', accent:'crimson', bottomArt:'web',
+  eyebrow:'OLED prototype 1 of 3 · after your red setup',
+  title:'Crimson <em>Web</em>',
+  blurb:'Built from your red setup: an outlined clock, a “this week” playtime card, framed game icons, tall tinted art strips and corner-bracket focus. The bottom screen is a showcase: a glowing web with the selected game’s name as a logo.',
+  notes:[['Everything takes the accent','Art strips, icon frames, the web and the stick LEDs all recolour together. Switch to Violet or Ultraviolet above.'],['Mostly true black','The wallpaper is black apart from a dim eclipse and skyline, so most OLED pixels stay off.'],['Icons, not covers','1×1 games show as framed icons with a dotted border, like your floral frames. Bigger tiles switch to artwork.']],
+  pages:[
+   {name:'Home',tiles:[W('c1','clock',0,0,1,1),W('c2','music',1,0,2,1),A('c3','eclipse',3,0,1,3),W('c4','playtime',4,0,2,1),A('c5','bat',0,1,1,2),G('c6','sm64',1,1),G('c7','smw',2,1),G('c8','sms',1,2),G('c9','mkdd',2,2),G('c10','pkc',4,1),G('c11','smg',4,2),A('c12','rain',5,1,1,2)]},
+   {name:'Play',tiles:[A('c20','moon',0,0,2,2),G('c21','ww',2,0),G('c22','mp1',3,0),G('c23','ff7',4,0),G('c24','ct',5,0),G('c25','aos',2,1),G('c26','xeno',3,1),G('c27','re4',4,1),G('c28','oot',5,1),W('c29','random',0,2,1,1),W('c30','recent',1,2,3,1),G('c31','sf2',4,2),G('c32','ms',5,2)]},
+   {name:'Library',tiles:[F('c40','Favourites',{kind:'fav'},0,0),F('c41','RPGs',{kind:'genre',value:['RPG']},1,0),F('c42','Fighting',{kind:'genre',value:['Fighting','Shmup']},2,0),A('c43','blossom',3,0,1,3),F('c44','Platformers',{kind:'genre',value:['Platformer']},4,0),F('c45','Racing',{kind:'genre',value:['Racing']},5,0),
+     F('c46','Runs in Dolphin',{kind:'emu',value:'Dolphin'},0,1,2,1),F('c47','Zelda',{kind:'regex',value:'zelda'},2,1),F('c48','Backlog',{kind:'unplayed'},4,1),F('c49','Android',{kind:'android'},5,1),
+     W('c50','lastImage',0,2,2,1),F('c51',"Tonight's 12",{kind:'random',n:12},2,2),W('c52','android',4,2,1,1,{app:'weather'}),W('c53','android',5,2,1,1,{app:'calendar'})]},
+   {name:'Apps',tiles:[A('c60','palms',0,0,1,3),G('c61','zzz',1,0),G('c62','mc',2,0),G('c63','dc',3,0),G('c64','vs',4,0),G('c65','sdv',5,0),P('c66','video',1,1),P('c67','music',2,1),P('c68','store',3,1),P('c69','remote',4,1),P('c70','pad',5,1),W('c71','music',1,2,2,1),G('c72','bal',3,2),W('c73','playtime',4,2,2,1,{filter:{kind:'android'}})]}
+  ]},
+ pinboard:{style:'pinboard', name:'Night Pinboard', accent:'violet', bottomArt:'focus',
+  eyebrow:'OLED prototype 2 of 3 · after the Risk of Rain setup',
+  title:'Night <em>Pinboard</em>',
+  blurb:'The pinned-card layout from the first photo, moved onto a black dotted board. White-framed art cards with a pin on the corner, page dots at the top, a dock at the bottom and button hints in the corners. The bottom screen shows the selected game’s artwork full size.',
+  notes:[['Dark board, light frames','The card frames and dock stay light so the layout reads like the original, while the board behind is near black.'],['Dock pages','The dock icons are the four pages: Home, Games, Collections and Apps. The arrows at the sides show there is more.'],['Accent on focus only','The pin, the frame glow and the active dock button take the accent. Everything else stays neutral.']],
+  pages:[
+   {name:'Home',tiles:[G('p1','sms',0,0,2,1),G('p2','sf2',2,0,1,3),G('p3','ww',3,0,2,1),P('p4','pad',5,0),P('p5','store',0,1,2,2),P('p6','remote',3,1),G('p7','smg',4,1,1,2),P('p8','video',5,1),G('p9','mp1',3,2),G('p10','ff7',5,2)]},
+   {name:'Games',tiles:[G('p20','xeno',0,0,1,2),G('p21','ct',1,0,2,1),G('p22','oot',3,0),G('p23','pkc',4,0),G('p24','bal',5,0,1,2),G('p25','re4',1,1),G('p26','aos',2,1),G('p27','ssbm',3,1,2,1),G('p28','ms',0,2,2,1),G('p29','sotn',2,2),G('p30','pb',3,2),G('p31','mkw',4,2),G('p32','sm',5,2)]},
+   {name:'Collections',tiles:[F('p40','RPGs',{kind:'genre',value:['RPG']},0,0,2,1),F('p41','Fighting & shmups',{kind:'genre',value:['Fighting','Shmup']},2,0,2,1),F('p42','Platformers',{kind:'genre',value:['Platformer']},4,0,2,1),F('p43','Runs in Dolphin',{kind:'emu',value:'Dolphin'},0,1,2,1),F('p44','Zelda',{kind:'regex',value:'zelda'},2,1,2,1),F('p45','Racing',{kind:'genre',value:['Racing']},4,1),F('p46','Backlog',{kind:'unplayed'},5,1),F('p47','Favourites',{kind:'fav'},0,2),F('p48',"Tonight's 12",{kind:'random',n:12},1,2),F('p49','Android',{kind:'android'},2,2),W('p50','recent',3,2,3,1)]},
+   {name:'Apps',tiles:[W('p60','clock',0,0,2,1),W('p61','android',2,0,1,1,{app:'weather'}),W('p62','android',3,0,1,1,{app:'calendar'}),P('p63','video',4,0),P('p64','music',5,0),W('p65','music',0,1,2,1),G('p66','zzz',2,1,1,2),G('p67','mc',3,1),G('p68','dc',4,1),G('p69','vs',5,1),W('p70','playtime',0,2,2,1),G('p71','sdv',3,2),G('p72','bal',4,2),P('p73','pad',5,2)]}
+  ]},
+ poster:{style:'poster', name:'Poster Wall', accent:'ultraviolet', bottomArt:'poster',
+  eyebrow:'OLED prototype 3 of 3 · after the tall art strips in both photos',
+  title:'Poster <em>Wall</em>',
+  blurb:'Pure black with tall posters. Tiles you are not on sit at half brightness and the selected one lights up with an accent glow underneath, so the screen stays dark and the focus is obvious. Widgets are plain text set straight on black.',
+  notes:[['Half-lit until focused','Unselected tiles are dimmed to 50%. On OLED that is a real power and contrast win, not just a look.'],['A shelf page of posters','Page two is six full-height posters in a row: the tall strips from your photos, used for games.'],['Condensed type','Big Shoulders for titles and the clock, so names fit on narrow posters.']],
+  pages:[
+   {name:'Now',tiles:[W('o1','clock',0,0,2,1),W('o2','lastImage',2,0,2,3),G('o3','mp1',4,0,1,3),G('o4','ff7',5,0,1,2),W('o5','playtime',5,2,1,1),W('o6','music',0,1,2,1),W('o7','recent',0,2,2,1)]},
+   {name:'Shelf',tiles:[G('o10','xeno',0,0,1,3),G('o11','ct',1,0,1,3),G('o12','sf2',2,0,1,3),G('o13','aos',3,0,1,3),G('o14','oot',4,0,1,3),G('o15','smg',5,0,1,3)]},
+   {name:'Folders',tiles:[F('o20','RPGs',{kind:'genre',value:['RPG']},0,0,1,3),F('o21','Fighting',{kind:'genre',value:['Fighting','Shmup']},1,0,1,3),F('o22','Platformers',{kind:'genre',value:['Platformer']},2,0,1,3),F('o23','Zelda',{kind:'regex',value:'zelda'},3,0,1,3),F('o24','Favourites',{kind:'fav'},4,0,2,2),W('o25','random',4,2,1,1),F('o26','Android',{kind:'android'},5,2)]},
+   {name:'Apps',tiles:[A('o30','blossom',0,0,2,3),G('o31','zzz',2,0,1,3),G('o32','sdv',3,0,1,3),G('o33','bal',4,0,1,2),G('o34','mc',5,0,1,2),W('o35','android',4,2,1,1,{app:'weather'}),W('o36','android',5,2,1,1,{app:'calendar'})]}
+  ]}
+};
+const C = CONCEPTS[KEY];
+
+/* ───── Helpers ───── */
+function hash(s){ let h = 2166136261; for(const c of String(s)){ h ^= c.charCodeAt(0); h = Math.imul(h,16777619); } return h >>> 0; }
+function rng(seed){ let a = hash(seed); return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function lum(hex){ let n = hex.replace('#',''); if(n.length===3) n = n.split('').map(c=>c+c).join(''); const v = [0,2,4].map(i => parseInt(n.substr(i,2),16)/255).map(c => c<=.03928 ? c/12.92 : Math.pow((c+.055)/1.055,2.4)); return .2126*v[0]+.7152*v[1]+.0722*v[2]; }
+function ago(g){ if(g.lastAt==null) return 'Never'; const m = Math.max(0, Math.round((Date.now()-g.lastAt)/60000)); if(m<1) return 'Just now'; if(m<60) return m+' min ago'; const h = Math.round(m/60); if(h<24) return h===1?'1 hour ago':h+' hours ago'; const d = Math.round(m/1440); return d===1?'Yesterday':d+' days ago'; }
+function dur(min){ const h = Math.floor(min/60), m = Math.round(min%60); return h ? `${h}h ${String(m).padStart(2,'0')}m` : `${m}m`; }
+const two = n => String(n).padStart(2,'0');
+const hm = d => two(d.getHours())+':'+two(d.getMinutes());
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const clone = o => JSON.parse(JSON.stringify(o));
+function drawSpr(c,name,x,y,c1,c2='#fff',c3='#1b1b1b',s=1){ const col = {'1':c1,'2':c2,'3':c3}; (SPR[name]||SPR.star).forEach((r,j) => { for(let i=0;i<r.length;i++){ const k = col[r[i]]; if(k){ c.fillStyle = k; c.fillRect(Math.round(x)+i*s, Math.round(y)+j*s, s, s); } } }); }
+const SC = new Map();
+function spriteURL(name,c1,c2='#ffffff',c3='#1b1b1b'){
+  const key = [name,c1,c2,c3].join('|'); if(SC.has(key)) return SC.get(key);
+  const rows = SPR[name] || SPR.star, cv = document.createElement('canvas'); cv.width = Math.max(...rows.map(r=>r.length)); cv.height = rows.length;
+  drawSpr(cv.getContext('2d'),name,0,0,c1,c2,c3); const u = cv.toDataURL(); SC.set(key,u); return u;
+}
+const sprFor = g => spriteURL(g.spr, g.c2, lum(g.c2)>.7 ? '#1b1b1b' : '#ffffff');
+
+/* ───── Pixel scenes for games that have one ───── */
+function px(c,x,y,w,h,col){ c.fillStyle = col; c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h)); }
+function disc(c,x,y,r,col){ c.fillStyle = col; c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill(); }
+function cloud(c,x,y){ x = Math.round(x); y = Math.round(y); c.fillStyle = '#fff'; c.fillRect(x,y+3,16,4); c.fillRect(x+3,y,6,4); c.fillRect(x+8,y+1,5,3); }
+const PIX = {
+  isle(c,W,H,r,boat){
+    const hz = Math.round(H*.58), sky = c.createLinearGradient(0,0,0,hz); sky.addColorStop(0, boat?'#2a6fd6':'#36a6ea'); sky.addColorStop(1, boat?'#bfe4ff':'#d6f3ff'); c.fillStyle = sky; c.fillRect(0,0,W,hz);
+    disc(c,W*.8,H*.22,H*.1,'#fff6c2'); for(let i=0;i<3;i++) cloud(c, r()*W*.6, 3+r()*H*.2);
+    const sea = c.createLinearGradient(0,hz,0,H); sea.addColorStop(0, boat?'#1b6fc0':'#1aa3d9'); sea.addColorStop(1, boat?'#0b3f86':'#0c6fa8'); c.fillStyle = sea; c.fillRect(0,hz,W,H-hz);
+    c.fillStyle = 'rgba(255,255,255,.55)'; for(let i=0;i<W/3;i++){ const f = Math.pow(r(),1.4); c.fillRect(Math.round(r()*W), Math.round(hz+2+f*(H-hz-2)), Math.round(2+f*8), 1); }
+    if(!boat){ const ix = W*.3, iy = hz+H*.07; c.fillStyle = '#f2d38a'; c.beginPath(); c.ellipse(ix,iy,W*.15,H*.06,0,Math.PI,0); c.fill(); let tx = ix, ty = iy; for(let i=0;i<14;i++){ tx = ix + Math.round(Math.sin(i/5)*3); ty = iy-2-i*1.7; px(c,tx,ty,2,2,'#7a4a22'); } c.fillStyle = '#2f9e44'; for(const k of [-1,1]) for(let i=0;i<9;i++) c.fillRect(Math.round(tx+k*i), Math.round(ty+i*i*.09), 2, 2); }
+    else { c.fillStyle = '#3e9b4a'; c.beginPath(); c.ellipse(W*.22,hz+1,W*.18,H*.17,0,Math.PI,0); c.fill(); const bx = Math.round(W*.62), by = Math.round(hz+H*.14); px(c,bx,by,16,3,'#b33a1a'); px(c,bx+7,by-14,1,14,'#5a3a1a'); c.fillStyle = '#f6f1e1'; c.beginPath(); c.moveTo(bx+8,by-13); c.lineTo(bx+17,by-2); c.lineTo(bx+8,by-2); c.fill(); }
+  },
+  space(c,W,H,r){
+    const g = c.createLinearGradient(0,0,0,H); g.addColorStop(0,'#070a24'); g.addColorStop(1,'#241a5e'); c.fillStyle = g; c.fillRect(0,0,W,H);
+    for(let i=0;i<W*H/55;i++){ c.fillStyle = 'rgba(255,255,255,'+(.25+r()*.6).toFixed(2)+')'; c.fillRect(Math.floor(r()*W),Math.floor(r()*H),1,1); }
+    const x = W*.7, y = H*.66, pr = H*.24; c.strokeStyle = '#f6d743'; c.lineWidth = 2; c.beginPath(); c.ellipse(x,y,pr*1.7,pr*.45,-.25,Math.PI,Math.PI*2); c.stroke();
+    disc(c,x,y,pr,'#3fae49'); c.beginPath(); c.ellipse(x,y,pr*1.7,pr*.45,-.25,0,Math.PI); c.stroke(); drawSpr(c,'star',Math.round(W*.26),Math.round(H*.18),'#f6d743','#fff','#1b1b1b',2);
+  }
+};
+const SCN = new Map();
+function sceneURL(kind,W,H,seed){ W = Math.max(24,Math.round(W)); H = Math.max(24,Math.round(H)); const key = [kind,W,H,seed].join('|'); if(SCN.has(key)) return SCN.get(key); const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const c = cv.getContext('2d'), r = rng(kind+seed); if(kind==='sea') PIX.isle(c,W,H,r,true); else (PIX[kind]||PIX.isle)(c,W,H,r,false); const u = cv.toDataURL(); SCN.set(key,u); return u; }
+
+/* ───── Accent-tinted art (smooth canvas, duotone) ───── */
+function glowStroke(c,col,blur){ c.strokeStyle = col; c.shadowColor = col; c.shadowBlur = blur; }
+function skyline(c,W,H,base,col,r,rim){ let x = -5; c.fillStyle = col; while(x < W){ const bw = W*(.04+r()*.07), bh = H*(.08+r()*base); c.fillRect(x,H-bh,bw,bh); if(rim){ c.fillStyle = rim; c.fillRect(x,H-bh,bw,Math.max(1,H*.004)); c.fillStyle = col; } x += bw + W*.004; } }
+function batPath(c,cx,cy,w){
+  const R = [[0,-.05],[.05,-.2],[.08,-.06],[.18,-.1],[.45,-.3],[.8,-.22],[1,.05],[.8,0],[.7,.12],[.55,.05],[.42,.2],[.28,.1],[.12,.3],[0,.16]];
+  c.beginPath(); R.forEach(([x,y],i) => { const X = cx + x*w/2, Y = cy + y*w/2; i ? c.lineTo(X,Y) : c.moveTo(X,Y); });
+  for(let i=R.length-1;i>=0;i--){ const [x,y] = R[i]; c.lineTo(cx - x*w/2, cy + y*w/2); } c.closePath(); c.fill();
+}
+function palm(c,x,y,h,lean,col){
+  c.strokeStyle = col; c.lineCap = 'round'; c.lineWidth = h*.05; c.beginPath(); c.moveTo(x,y); c.quadraticCurveTo(x+lean*.5,y-h*.5,x+lean,y-h); c.stroke();
+  const tx = x+lean, ty = y-h; c.lineWidth = h*.035;
+  for(const [dx,dy] of [[-.5,.15],[-.42,.32],[-.25,.4],[.5,.15],[.42,.32],[.25,.42],[0,-.18]]){ c.beginPath(); c.moveTo(tx,ty); c.quadraticCurveTo(tx+dx*h*.35,ty-h*.12+dy*h*.1,tx+dx*h*.62,ty+dy*h*.55); c.stroke(); }
+}
+const ART = {
+  eclipse(c,W,H,A,r){
+    c.fillStyle = '#000'; c.fillRect(0,0,W,H);
+    const R = Math.min(W,H)*.28, cx = W*.5, cy = H*.3;
+    const g = c.createRadialGradient(cx,cy,R*.6,cx,cy,R*2.6); g.addColorStop(0,A.acc+'88'); g.addColorStop(1,'transparent'); c.fillStyle = g; c.fillRect(0,0,W,H);
+    c.lineWidth = R*.09; glowStroke(c,A.hi,R*.8); c.beginPath(); c.arc(cx,cy,R,0,Math.PI*2); c.stroke(); c.shadowBlur = 0;
+    disc(c,cx,cy,R*.95,'#000');
+    c.fillStyle = A.acc+'44'; for(let i=0;i<14;i++) c.fillRect(0,H*.55+i*H*.02,W,1);
+    c.fillStyle = A.acc+'30'; for(let i=0;i<W/6;i++) c.fillRect(r()*W,r()*H*.6,1,H*(.02+r()*.06));
+    skyline(c,W,H,.32,'#000',r,A.acc);
+  },
+  bat(c,W,H,A,r){
+    const g = c.createLinearGradient(0,0,0,H); g.addColorStop(0,A.lo); g.addColorStop(.45,A.acc); g.addColorStop(1,'#000'); c.fillStyle = g; c.fillRect(0,0,W,H);
+    const R = Math.min(W,H)*.36; const mg = c.createRadialGradient(W*.5,H*.36,0,W*.5,H*.36,R*1.6); mg.addColorStop(0,A.hi); mg.addColorStop(.6,A.hi+'cc'); mg.addColorStop(.62,A.acc+'66'); mg.addColorStop(1,'transparent'); c.fillStyle = mg; c.fillRect(0,0,W,H);
+    c.fillStyle = '#000'; batPath(c,W*.5,H*.36,Math.min(W*.9,R*2.3));
+    skyline(c,W,H,.28,'#000',r);
+  },
+  web(c,W,H,A,r){
+    c.fillStyle = '#000'; c.fillRect(0,0,W,H);
+    const cx = W*.42, cy = H*.38, N = 14, L = Math.hypot(W,H), spokes = [];
+    for(let i=0;i<N;i++){ const a = i/N*Math.PI*2 + (r()-.5)*.15; spokes.push(a); }
+    c.lineWidth = Math.max(1.2,W*.004); glowStroke(c,A.acc,W*.02);
+    spokes.forEach(a => { c.beginPath(); c.moveTo(cx,cy); c.lineTo(cx+Math.cos(a)*L,cy+Math.sin(a)*L); c.stroke(); });
+    for(let k=1;k<12;k++){
+      const d = Math.pow(k,1.35)*Math.min(W,H)*.045; c.globalAlpha = Math.max(.25, 1 - k*.06); c.beginPath();
+      spokes.forEach((a,i) => { const b = spokes[(i+1)%N], p1 = [cx+Math.cos(a)*d, cy+Math.sin(a)*d], p2 = [cx+Math.cos(b)*d, cy+Math.sin(b)*d], m = (a+b+(i===N-1?Math.PI*2:0))/2, sag = d*.82; if(i===0) c.moveTo(p1[0],p1[1]); c.quadraticCurveTo(cx+Math.cos(m)*sag, cy+Math.sin(m)*sag, p2[0], p2[1]); });
+      c.stroke();
+    }
+    c.globalAlpha = 1; c.shadowBlur = 0;
+    const v = c.createRadialGradient(cx,cy,0,cx,cy,L*.6); v.addColorStop(0,'transparent'); v.addColorStop(1,'rgba(0,0,0,.75)'); c.fillStyle = v; c.fillRect(0,0,W,H);
+  },
+  palms(c,W,H,A,r){
+    const hz = H*.64, g = c.createLinearGradient(0,0,0,hz); g.addColorStop(0,'#000'); g.addColorStop(.55,A.lo); g.addColorStop(1,A.acc); c.fillStyle = g; c.fillRect(0,0,W,hz);
+    const sr = Math.min(W,H)*.3, sg = c.createLinearGradient(0,hz-sr,0,hz); sg.addColorStop(0,A.hi); sg.addColorStop(1,A.acc); c.fillStyle = sg; c.beginPath(); c.arc(W/2,hz,sr,Math.PI,0); c.fill();
+    c.fillStyle = g; for(let k=0;k<6;k++) c.fillRect(W/2-sr, hz - sr*.55 + k*sr*.1, sr*2, sr*(.015+k*.012));
+    c.fillStyle = '#000'; c.fillRect(0,hz,W,H-hz); c.strokeStyle = A.acc+'aa'; c.lineWidth = 1;
+    for(let i=1;i<9;i++){ const y = hz + Math.pow(i/8,2)*(H-hz); c.beginPath(); c.moveTo(0,y); c.lineTo(W,y); c.stroke(); }
+    for(let i=-8;i<=8;i++){ c.beginPath(); c.moveTo(W/2+i*W*.02,hz); c.lineTo(W/2+i*W*.2,H); c.stroke(); }
+    palm(c,W*.12,H*.9,H*.62,W*.08,'#000'); palm(c,W*.88,H*.92,H*.5,-W*.07,'#000');
+  },
+  rain(c,W,H,A,r){
+    c.fillStyle = '#030002'; c.fillRect(0,0,W,H);
+    const sx = W*.58, sy = H*.16, sw = W*.3, sh = H*.1; c.lineWidth = Math.max(2,W*.012); glowStroke(c,A.hi,W*.06); c.strokeRect(sx,sy,sw,sh); c.shadowBlur = 0;
+    c.fillStyle = A.acc+'55'; for(let i=0;i<W*H/900;i++) c.fillRect(r()*W, r()*H, 1, H*(.02+r()*.05));
+    const rg = c.createRadialGradient(W*.5,H*.95,0,W*.5,H*.95,W*.6); rg.addColorStop(0,A.acc+'88'); rg.addColorStop(1,'transparent'); c.fillStyle = rg; c.fillRect(0,0,W,H);
+    const fx = W*.42, fy = H*.86, s = Math.min(W,H)*.5;
+    c.fillStyle = '#000'; c.beginPath(); c.arc(fx, fy-s*.62, s*.28, Math.PI, 0); c.fill(); c.lineWidth = Math.max(1.5,W*.006); glowStroke(c,A.acc,W*.03); c.beginPath(); c.arc(fx, fy-s*.62, s*.28, Math.PI, 0); c.stroke(); c.shadowBlur = 0;
+    c.fillStyle = '#000'; c.fillRect(fx-s*.06, fy-s*.6, s*.12, s*.42); c.fillRect(fx-s*.05, fy-s*.2, s*.035, s*.2); c.fillRect(fx+s*.015, fy-s*.2, s*.035, s*.2); disc(c,fx,fy-s*.62,s*.06,'#000');
+    c.fillRect(0,fy,W,H-fy);
+  },
+  moon(c,W,H,A,r){
+    c.fillStyle = '#000'; c.fillRect(0,0,W,H);
+    for(let i=0;i<W*H/700;i++){ c.fillStyle = `rgba(255,255,255,${(r()*.5).toFixed(2)})`; c.fillRect(r()*W, r()*H*.7, 1, 1); }
+    const R = Math.min(W,H)*.24, mx = W*.64, my = H*.3; c.shadowColor = A.acc; c.shadowBlur = R*.9; disc(c,mx,my,R,A.hi); c.shadowBlur = 0; disc(c,mx-R*.42,my-R*.18,R*.92,'#000');
+    for(const [base,col] of [[.62,A.lo],[.74,'#000']]){ c.fillStyle = col; c.beginPath(); c.moveTo(0,H); let x = 0; c.lineTo(0,H*base); while(x<W){ x += W*(.06+r()*.1); c.lineTo(x, H*(base - r()*.14)); } c.lineTo(W,H); c.fill(); }
+  },
+  blossom(c,W,H,A,r){
+    c.fillStyle = '#000'; c.fillRect(0,0,W,H);
+    c.strokeStyle = A.lo; c.lineCap = 'round';
+    const branch = (x,y,a,len,w,d) => { if(d>5 || len<6) return; const x2 = x+Math.cos(a)*len, y2 = y+Math.sin(a)*len; c.lineWidth = w; c.beginPath(); c.moveTo(x,y); c.lineTo(x2,y2); c.stroke(); flowers.push([x2,y2]); branch(x2,y2,a+(r()-.3)*.8,len*.72,w*.68,d+1); if(r()>.35) branch(x2,y2,a+(r()-.7)*1.1,len*.6,w*.6,d+1); };
+    const flowers = []; branch(-W*.05,H*.05,.55,Math.min(W,H)*.42,Math.min(W,H)*.05,0);
+    flowers.forEach(([x,y]) => { const s = Math.min(W,H)*(.02+r()*.025); c.shadowColor = A.acc; c.shadowBlur = s*2; for(let k=0;k<5;k++){ const a = k/5*Math.PI*2; disc(c,x+Math.cos(a)*s*.7,y+Math.sin(a)*s*.7,s*.55,k%2?A.acc:A.hi); } c.shadowBlur = 0; disc(c,x,y,s*.3,'#fff'); });
+    for(let i=0;i<W*H/2500;i++){ c.fillStyle = (r()>.5?A.acc:A.hi) + 'aa'; c.beginPath(); c.ellipse(r()*W, r()*H, Math.min(W,H)*.012, Math.min(W,H)*.006, r()*3, 0, Math.PI*2); c.fill(); }
+  }
+};
+const ARTC = new Map();
+function artURL(kind,W,H,seed){
+  const A = ACCENTS[state.accent], key = [kind,W,H,seed,state.accent].join('|'); if(ARTC.has(key)) return ARTC.get(key);
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const c = cv.getContext('2d'); ART[kind](c,W,H,A,rng(kind+seed));
+  const u = cv.toDataURL('image/jpeg',.88); ARTC.set(key,u); return u;
+}
+const tileArt = t => artURL(t.art, t.w*150, t.h*140, t.id);
+
+/* ───── Wallpapers (one per concept, behind every page) ───── */
+function wallURL(){
+  const A = ACCENTS[state.accent], key = 'wall|'+C.style+'|'+state.accent; if(ARTC.has(key)) return ARTC.get(key);
+  const W = 1104, H = 540, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const c = cv.getContext('2d'), r = rng('wall'+C.style);
+  c.fillStyle = '#000'; c.fillRect(0,0,W,H);
+  if(C.style==='crimson'){
+    const g = c.createRadialGradient(W*.82,H*.2,0,W*.82,H*.2,W*.45); g.addColorStop(0,A.acc+'40'); g.addColorStop(1,'transparent'); c.fillStyle = g; c.fillRect(0,0,W,H);
+    c.lineWidth = 6; glowStroke(c,A.acc+'aa',40); c.beginPath(); c.arc(W*.82,H*.2,H*.26,0,Math.PI*2); c.stroke(); c.shadowBlur = 0; disc(c,W*.82,H*.2,H*.25,'#000');
+    c.fillStyle = A.acc+'26'; for(let i=0;i<180;i++) c.fillRect(r()*W, r()*H*.8, 1, H*(.03+r()*.1));
+    skyline(c,W,H,.26,A.lo,r); skyline(c,W,H,.16,'#000',r,A.acc+'88');
+  } else if(C.style==='pinboard'){
+    c.fillStyle = '#0a0a0d'; c.fillRect(0,0,W,H);
+    c.fillStyle = '#25252e'; for(let y=8;y<H;y+=16) for(let x=8;x<W;x+=16) c.fillRect(x,y,2,2);
+    const g = c.createRadialGradient(W*.5,H*1.1,0,W*.5,H*1.1,W*.6); g.addColorStop(0,A.acc+'30'); g.addColorStop(1,'transparent'); c.fillStyle = g; c.fillRect(0,0,W,H);
+  } else {
+    const g = c.createRadialGradient(W*.5,H*1.15,0,W*.5,H*1.15,W*.55); g.addColorStop(0,A.acc+'38'); g.addColorStop(1,'transparent'); c.fillStyle = g; c.fillRect(0,0,W,H);
+  }
+  const u = cv.toDataURL('image/jpeg',.9); ARTC.set(key,u); return u;
+}
+
+/* ───── Rules ───── */
+function matchRule(rule){
+  if(!rule) return LIB.slice();
+  let list = LIB; if(rule.p) list = list.filter(g => rule.p.includes(g.p));
+  switch(rule.kind){
+    case 'fav': return list.filter(g => g.fav);
+    case 'android': return list.filter(g => g.p==='AND');
+    case 'emu': return list.filter(g => PLAT[g.p].emu===rule.value);
+    case 'console': return list.filter(g => rule.value.includes(g.p));
+    case 'genre': return list.filter(g => rule.value.includes(g.g));
+    case 'unplayed': return list.filter(g => g.pt < 30);
+    case 'random': { const r = rng('day'+new Date().toDateString()); const a = list.filter(g => g.p!=='AND'); for(let i=a.length-1;i>0;i--){ const j = Math.floor(r()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a.slice(0,rule.n||12); }
+    case 'regex': { let re; try{ re = new RegExp(rule.value,'i'); }catch(e){ return []; } return list.filter(g => re.test(g.t)); }
+    default: return list.slice();
+  }
+}
+function ruleText(rule){
+  if(!rule) return 'All games';
+  switch(rule.kind){
+    case 'fav': return 'Starred with X'; case 'android': return 'Installed Android games'; case 'emu': return 'Everything ' + rule.value + ' runs';
+    case 'console': return rule.value.map(c => PLAT[c].n).join(', '); case 'genre': return rule.value.join(', ');
+    case 'random': return (rule.n||12) + ' games, reshuffled daily'; case 'regex': return '/' + rule.value + '/i'; case 'unplayed': return 'Under 30 minutes played';
+  }
+  return 'All games';
+}
+const recentList = rule => matchRule(rule).filter(g => g.lastAt!=null).sort((a,b) => b.lastAt-a.lastAt);
+
+/* ───── Icons ───── */
+const ICON = {
+  prev:'<svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z" fill="currentColor"/></svg>',
+  next:'<svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z" fill="currentColor"/></svg>',
+  play:'<svg viewBox="0 0 24 24"><path d="M7 4v16l13-8z" fill="currentColor"/></svg>',
+  pause:'<svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z" fill="currentColor"/></svg>',
+  note:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 17.5V5l11-2v12.5a3 3 0 1 1-2-2.8V7.2l-7 1.3v9a3 3 0 1 1-2-2.8z"/></svg>',
+  wifi:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19.5" r="1.3" fill="currentColor"/></svg>',
+  bat:'<svg viewBox="0 0 28 24"><rect x="1.5" y="6" width="22" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><rect x="4" y="8.5" width="17" height="7" rx="1.5" fill="currentColor"/><rect x="24.5" y="10" width="2.5" height="4" rx="1" fill="currentColor"/></svg>',
+  rain:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 15a4 4 0 0 1-.6-8 5.5 5.5 0 0 1 10.6 1.3A3.5 3.5 0 0 1 17 15zM9 18l-1 3M13 18l-1 3M17 18l-1 3"/></svg>',
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  bag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 8h14l-1 13H6zM9 8V6a3 3 0 0 1 6 0v2"/></svg>',
+  stream:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/><path d="M10 8.5l4 1.5-4 1.5z" fill="currentColor"/></svg>',
+  playb:'<svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4" fill="currentColor" opacity=".25"/><path d="M10 9v6l5-3z" fill="currentColor"/></svg>',
+  pad:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 7h10a5 5 0 0 1 4.8 6.4l-1 3.4a2.5 2.5 0 0 1-4.3.9L14.5 16h-5l-2 1.7a2.5 2.5 0 0 1-4.3-.9l-1-3.4A5 5 0 0 1 7 7z"/><path d="M8 10v4M6 12h4"/><circle cx="16" cy="11" r=".8" fill="currentColor"/><circle cx="18" cy="13" r=".8" fill="currentColor"/></svg>',
+  home:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 8h-3v9h-5v-6h-2v6H6v-9H3z"/></svg>',
+  folder:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+  grid:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>'
+};
+const appIcon = a => ICON[a.g==='play' ? 'playb' : a.g];
+
+/* ───── State ───── */
+const LS = 'thor-oled-'+KEY;
+const state = {page:0, focus:{}, open:null, launch:null, roll:{}, music:{}, toast:null, details:false, accent:C.accent};
+try{ const s = localStorage.getItem(LS+'-accent'); if(s && ACCENTS[s]) state.accent = s; }catch(e){}
+try{ const s = JSON.parse(localStorage.getItem(LS+'-lib') || 'null'); if(s){ LIB.forEach(g => g.fav = s.favs.includes(g.id)); Object.entries(s.played||{}).forEach(([id,v]) => { if(byId[id]){ byId[id].lastAt = v[0]; byId[id].pt = v[1]; } }); } }catch(e){}
+const played = {};
+function saveLib(){ try{ localStorage.setItem(LS+'-lib', JSON.stringify({favs:LIB.filter(g=>g.fav).map(g=>g.id), played})); }catch(e){} }
+const pages = clone(C.pages);
+const curPage = () => pages[state.page];
+const musicState = t => state.music[t.id] || (state.music[t.id] = {i:hash(t.id)%TRACKS.length, pos:41, playing:C.style!=='crimson'&&t.id==='p65'});
+
+/* ───── Tile rendering ───── */
+const top = $('#top'), track = $('#track'), bottom = $('#bottom'), thor = $('#thor'), chrome = $('#chrome'), ov = $('#ov');
+function miniHTML(g){ return `<div class="mini" style="--c1:${g.c1};--c2:${g.c2}" title="${esc(g.t)}"><img alt="" src="${sprFor(g)}"></div>`; }
+function posterHTML(g,w,h,chip){
+  const shape = w>=2&&h>=2 ? 'big' : w>h ? 'wide' : h>w ? 'tall' : 'sq';
+  const bg = g.scene && w>=2 ? `<img class="scene" alt="" src="${sceneURL(g.scene, w*44, h*42, g.id)}">` : `<div class="pbg" style="--c1:${g.c1};--c2:${g.c2}"></div><img class="psp" alt="" src="${sprFor(g)}">`;
+  return `<div class="poster ${shape}">${bg}<div class="pov"><div class="pchip">${esc(PLAT[g.p].n)}</div><div class="plogo">${esc(g.t)}</div></div>${chip?`<span class="chip">${chip}</span>`:''}</div>`;
+}
+function iconHTML(g){ return `<div class="ico"><div class="ico-in" style="--c1:${g.c1};--c2:${g.c2}"><img alt="" src="${sprFor(g)}"></div></div>`; }
+function appHTML(t){
+  const a = APPS[t.app];
+  if(C.style==='crimson' && t.w===1 && t.h===1) return `<div class="ico"><div class="ico-in" style="--c1:${a.c};--c2:${a.c};--af:${a.f}">${appIcon(a)}</div></div>`;
+  return `<div class="clip"><div class="app${a.pat?' pat':''}" style="--ac:${a.c};--af:${a.f}">${appIcon(a)}<span class="app-n">${esc(a.n)}</span></div></div>`;
+}
+function folderHTML(t){
+  const list = matchRule(t.rule), n = list.length;
+  if(C.style==='crimson') return `<div class="cf${t.w>=2?' w':''}"><div class="cf-box">${list.slice(0,t.w>=2?8:4).map(miniHTML).join('')}</div><div class="cf-n">${esc(t.name)} · ${n}</div></div>`;
+  if(C.style==='poster') return `<div class="clip"><div class="pf${t.w>=2?' w':''}" style="--c1:${(list[0]||{c1:'#222'}).c1}"><div class="pf-st">${list.slice(0, t.w>=2?4:3).map(miniHTML).join('')}</div><div class="pf-n">${esc(t.name)}</div><div class="pf-c">${n} games · ${esc(RULES[t.rule.kind])}</div></div></div>`;
+  return `<div class="clip"><div class="pbf"><div class="fan${t.w>=2?' row':''}">${list.slice(0,t.w>=2?5:3).map(miniHTML).join('')}</div><div class="pbf-n">${esc(t.name)}<span>${n}</span></div></div></div>`;
+}
+function weekData(rule){
+  const share = rule ? .45 : 1, base = [85,40,0,150,95,210,62], out = [];
+  for(let i=6;i>=0;i--){ const d = new Date(); d.setDate(d.getDate()-i); out.push({k:DAYS[d.getDay()].slice(0,2), label:DAYS[d.getDay()], m:Math.round(base[6-i]*share)}); }
+  return out;
+}
+function widgetHTML(t){
+  const d = new Date();
+  switch(t.kind){
+    case 'clock': return `<div class="clip"><div class="clk"><div class="clk-t">${hm(d)}</div><div class="clk-d">${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}</div></div></div>`;
+    case 'music': {
+      const s = musicState(t), tr = TRACKS[s.i];
+      if(!s.playing && C.style==='crimson' && s.pos===41) return `<div class="clip"><div class="nomedia">${ICON.note}<span>No media playing</span></div></div>`;
+      return `<div class="clip"><div class="mus"><div class="mus-art">${miniHTML(byId[tr.g])}</div><div class="mus-m"><div class="mus-l">${s.playing?'Now playing':'Paused'}</div><div class="mus-t">${esc(tr.t)}</div><div class="mus-a">${esc(tr.a)}</div><div class="mus-p"><i data-mp style="width:${(s.pos/tr.len*100).toFixed(1)}%"></i></div><div class="mus-ctl"><button data-mus="prev" aria-label="Previous track">${ICON.prev}</button><button class="play" data-mus="play" aria-label="${s.playing?'Pause':'Play'}">${s.playing?ICON.pause:ICON.play}</button><button data-mus="next" aria-label="Next track">${ICON.next}</button></div></div></div></div>`;
+    }
+    case 'playtime': {
+      const days = weekData(t.filter), total = days.reduce((a,b)=>a+b.m,0), max = Math.max(1,...days.map(x=>x.m));
+      if(t.w===1) return `<div class="clip"><div class="ptw"><div class="ptw-n">${dur(total)}</div><div class="ptw-l">this week</div><div class="ptw-bars">${days.map((x,i) => `<i class="${i===6?'today':''}" style="height:${(x.m/max*100).toFixed(1)}%" title="${x.label}: ${dur(x.m)}"></i>`).join('')}</div></div></div>`;
+      return `<div class="clip"><div class="ptw"><div class="ptw-n">${dur(total)}</div><div class="ptw-l">${t.filter?'on Android this week':'this week'}</div><div class="ptw-bars">${days.map((x,i) => `<i class="${i===6?'today':''}" style="height:${(x.m/max*100).toFixed(1)}%" title="${x.label}: ${dur(x.m)}"></i>`).join('')}</div><div class="ptw-days">${days.map((x,i) => `<span class="${i===6?'today':''}">${x.k}</span>`).join('')}</div></div></div>`;
+    }
+    case 'recent': { const list = recentList(t.filter).slice(0, t.w===1?1:t.w===2?3:4); return `<div class="clip"><div class="rec"><div class="rec-l">Recently played</div><div class="rec-row">${list.map(miniHTML).join('')}</div></div></div>`; }
+    case 'random': { const pick = state.roll[t.id] && byId[state.roll[t.id]]; if(pick) return `<div class="clip">${posterHTML(pick,t.w,t.h)}</div><span class="roll-chip">A to play</span>`; return `<div class="clip"><div class="rnd"><img alt="" src="${spriteURL('dice','#000','#ffffff',ACCENTS[state.accent].acc)}"><div class="rnd-l">Surprise me</div><div class="rnd-s">${LIB.length} games</div></div></div>`; }
+    case 'lastImage': { const g = recentList(t.filter)[0]; return `<div class="clip">${posterHTML(g,t.w,t.h,'Continue')}</div>`; }
+    case 'android': return t.app==='calendar' ? `<div class="clip"><div class="aw"><div class="aw-top"><span>Calendar</span>${ICON.cal}</div><div class="aw-big">${d.getDate()}</div><div class="aw-s">No events today</div></div></div>` : `<div class="clip"><div class="aw"><div class="aw-top"><span>Weather</span>${ICON.rain}</div><div class="aw-big">21°</div><div class="aw-s">Light rain · H 24° L 18°</div></div></div>`;
+  }
+  return '';
+}
+function tileInner(t){
+  if(t.type==='game'){ const g = byId[t.game]; if(C.style==='crimson' && t.w===1 && t.h===1) return iconHTML(g); return `<div class="clip">${posterHTML(g,t.w,t.h)}</div>`; }
+  if(t.type==='art') return `<div class="clip"><img class="art" alt="" src="${tileArt(t)}">${t.caption?`<span class="cap">${esc(t.caption)}</span>`:''}</div>`;
+  if(t.type==='app') return appHTML(t);
+  if(t.type==='folder') return folderHTML(t);
+  return widgetHTML(t);
+}
+function tileName(t){
+  if(t.type==='game') return byId[t.game].t;
+  if(t.type==='folder') return t.name;
+  if(t.type==='art') return t.caption || ARTNAMES[t.art];
+  if(t.type==='app') return APPS[t.app].n;
+  if(t.kind==='android') return t.app==='calendar' ? 'Calendar' : 'Weather';
+  return WIDGETS[t.kind];
+}
+function renderTile(t){
+  const el = document.createElement('div');
+  el.className = `tile t-${t.type}${t.kind?' k-'+t.kind:''}`; el.dataset.id = t.id;
+  el.style.gridColumn = `${t.x+1} / span ${t.w}`; el.style.gridRow = `${t.y+1} / span ${t.h}`;
+  el.setAttribute('role','button'); el.setAttribute('aria-label', tileName(t));
+  el.innerHTML = tileInner(t); return el;
+}
+function renderAll(){
+  track.innerHTML = '';
+  pages.forEach((p,i) => { const pe = document.createElement('section'); pe.className = 'page'; pe.dataset.pi = i; const grid = document.createElement('div'); grid.className = 'grid'; p.tiles.forEach(t => grid.append(renderTile(t))); pe.append(grid); track.append(pe); });
+  $('#wallimg').src = wallURL(); refresh();
+}
+function rerenderTile(t){ const old = track.querySelector(`[data-id="${t.id}"]`); if(!old) return; const n = renderTile(t); if(old.classList.contains('focus')) n.classList.add('focus'); old.replaceWith(n); }
+function ensureFocus(){ const p = curPage(); if(!p.tiles.find(t => t.id===state.focus[state.page])){ const s = p.tiles.slice().sort((a,b) => a.y-b.y || a.x-b.x); state.focus[state.page] = s[0].id; } }
+const focused = () => curPage().tiles.find(t => t.id===state.focus[state.page]);
+function refresh(){
+  track.style.transform = `translateX(${-state.page*100}%)`;
+  top.querySelector('.wall').style.transform = `translateX(${-state.page/(pages.length-1)*13.04}%)`;
+  ensureFocus(); applyFocus(); renderChrome(); renderOverlay(); renderBottom();
+}
+function applyFocus(){ track.querySelectorAll('.focus').forEach(e => e.classList.remove('focus')); const el = track.children[state.page].querySelector(`[data-id="${state.focus[state.page]}"]`); if(el) el.classList.add('focus'); }
+
+/* ───── Chrome per concept ───── */
+function renderChrome(){
+  const d = new Date(), n = pages.length, i = state.page;
+  if(C.style==='crimson'){
+    chrome.innerHTML = `<div class="c-name"><b>${esc(curPage().name)}</b> · ${i+1}/${n}</div><div class="c-pager">${pages.map((p,k) => `<i class="${k===i?'on':''}"></i>`).join('')}</div>`;
+  } else if(C.style==='pinboard'){
+    const dock = ['home','pad','folder','grid'];
+    chrome.innerHTML = `<div class="pb-top"><span class="pb-tag">${esc(curPage().name)}</span><div class="pb-dots">${pages.map((p,k) => `<i class="${k===i?'on':''}"></i>`).join('')}</div><div class="pb-sys"><span data-now>${hm(d)}</span>|<span>72%</span>${ICON.bat.replace('<svg','<svg width="18" height="14"')}<span class="av">T</span></div></div>
+      <button class="pb-arrow l" data-go="-1" aria-label="Previous page"${i===0?' hidden':''}>‹</button><button class="pb-arrow r" data-go="1" aria-label="Next page"${i===n-1?' hidden':''}>›</button>
+      <div class="pb-bot"><div class="pb-h"><span><b>B</b>Back</span><span><b>Y</b>Details</span></div><div class="pb-dock">${pages.map((p,k) => `<button class="${k===i?'on':''}" data-page="${k}" aria-label="${esc(p.name)}">${ICON[dock[k]||'grid']}</button>`).join('')}</div><div class="pb-h r"><span><b>A</b>Select</span><span><b>≡</b>Menu</span></div></div>`;
+  } else {
+    chrome.innerHTML = `<div class="po-top"><div class="po-name">${esc(curPage().name)}</div><div class="po-ix">${two(i+1)} / ${two(n)}</div><div class="po-tabs">${pages.map((p,k) => `<button class="${k===i?'on':''}" data-page="${k}">${esc(p.name)}</button>`).join('')}</div><div class="po-time" data-now>${hm(d)}</div></div><div class="po-line"><i style="left:${i/n*100}%;width:${100/n}%"></i></div>`;
+  }
+}
+let toastT;
+function toast(msg){ state.toast = msg; renderOverlay(); clearTimeout(toastT); toastT = setTimeout(() => { state.toast = null; renderOverlay(); }, 1800); }
+function renderOverlay(){
+  ov.innerHTML = '';
+  if(state.open){
+    const o = state.open, el = document.createElement('div'); el.className = 'fview';
+    el.innerHTML = `<div class="fv-h"><div><div class="fv-k">${esc(o.kind)}</div><div class="fv-t">${esc(o.title)}</div></div><code>${esc(o.rule)}</code><span class="n">${o.ids.length} games</span></div><div class="fv-g">${o.ids.map((id,k) => `<div class="fv-i${k===o.i?' focus':''}" data-fi="${k}">${posterHTML(byId[id],1,2)}</div>`).join('')}</div>`;
+    ov.append(el);
+    const f = el.querySelector('.fv-i.focus'), g = el.querySelector('.fv-g');
+    if(f && g){ if(f.offsetTop < g.scrollTop) g.scrollTop = f.offsetTop - 10; else if(f.offsetTop+f.offsetHeight > g.scrollTop+g.clientHeight) g.scrollTop = f.offsetTop+f.offsetHeight-g.clientHeight+10; }
+  }
+  if(state.launch){
+    const g = byId[state.launch.id], el = document.createElement('div'); el.className = 'launch';
+    el.innerHTML = `<div><div class="l-cv">${posterHTML(g,1,2)}</div><div class="l-t">${esc(g.t)}</div><div class="l-s">${state.launch.phase==='play' ? `Running in ${esc(PLAT[g.p].emu)}. Press B to end this mock session.` : `Starting ${esc(PLAT[g.p].emu)}…`}</div>${state.launch.phase==='play'?'':'<div class="l-bar"><i></i></div>'}</div>`;
+    ov.append(el);
+  }
+  if(state.toast){ const el = document.createElement('div'); el.className = 'toast'; el.textContent = state.toast; ov.append(el); }
+}
+
+/* ───── Bottom screen ───── */
+const H = (k,txt) => `<span><span class="g">${k}</span>${txt}</span>`;
+function focusInfo(){
+  if(state.launch){ const g = byId[state.launch.id]; return {g, title:g.t, kind:'Now playing', meta:`${PLAT[g.p].n} · ${PLAT[g.p].emu}`, hints:H('B','End session')}; }
+  if(state.open){ const g = byId[state.open.ids[state.open.i]]; return g ? {g, title:g.t, kind:state.open.title, meta:`${PLAT[g.p].n} · ${g.y} · ${dur(g.pt)} played`, hints:H('A','Play')+H('X',g.fav?'Unstar':'Star')+H('B','Back')} : {title:state.open.title, kind:'Folder', meta:'Empty', hints:H('B','Back')}; }
+  const t = focused();
+  if(t.type==='game'){ const g = byId[t.game]; return {g, title:g.t, kind:PLAT[g.p].n, meta:`${PLAT[g.p].emu} · ${dur(g.pt)} played · ${ago(g)}`, hints:H('A','Play')+H('X',g.fav?'Unstar':'Star')+H('Y','Details')}; }
+  if(t.type==='folder'){ const list = matchRule(t.rule); return {list, title:t.name, kind:'Folder · '+RULES[t.rule.kind], meta:`${list.length} games · ${ruleText(t.rule)}`, hints:H('A','Open')}; }
+  if(t.type==='art') return {art:t, title:tileName(t), kind:'Image tile', meta:'Accent-tinted artwork. It sets the mood and does nothing when pressed.', hints:''};
+  if(t.type==='app') return {app:APPS[t.app], title:APPS[t.app].n, kind:'Android app', meta:'Opens the app.', hints:H('A','Open')};
+  if(t.kind==='lastImage'){ const g = recentList(t.filter)[0]; return {g, title:g.t, kind:'Continue', meta:`${PLAT[g.p].n} · ${PLAT[g.p].emu} · ${ago(g)}`, hints:H('A','Resume')}; }
+  if(t.kind==='random' && state.roll[t.id]){ const g = byId[state.roll[t.id]]; return {g, title:g.t, kind:'Rolled', meta:`${PLAT[g.p].n} · ${dur(g.pt)} played`, hints:H('A','Play')+H('B','Clear')}; }
+  if(t.kind==='music'){ const s = musicState(t), tr = TRACKS[s.i]; return {g:byId[tr.g], title:tr.t, kind:s.playing?'Now playing':'Music', meta:tr.a, hints:H('A',s.playing?'Pause':'Play')}; }
+  const hint = {random:H('A','Roll'), recent:H('A','History')}[t.kind] || '';
+  return {title:tileName(t), kind:t.kind==='android'?'Android widget':'Widget', meta:WDESC[t.kind], hints:hint};
+}
+function detailRows(info){
+  const g = info.g; if(!g) return '';
+  return `<dl class="bs-rows"><div><dt>Platform</dt><dd>${esc(PLAT[g.p].n)} · ${g.y}</dd></div><div><dt>Opens in</dt><dd>${esc(PLAT[g.p].emu)}</dd></div><div><dt>Played</dt><dd>${dur(g.pt)}</dd></div><div><dt>Last played</dt><dd>${ago(g)}</dd></div><div><dt>Favourite</dt><dd>${g.fav?'★ Yes':'No'}</dd></div></dl>`;
+}
+function statusPill(){ return `<div class="bs-status">${ICON.wifi}<span class="bat">${ICON.bat}</span><span>91%</span><span data-now>${hm(new Date())}</span></div>`; }
+function renderBottom(){
+  const info = focusInfo(), A = ACCENTS[state.accent];
+  let html = '';
+  const extra = state.details && info.g ? detailRows(info) : info.list ? `<div class="bs-minis">${info.list.slice(0,6).map(miniHTML).join('')}</div>` : '';
+  if(C.style==='crimson'){
+    html = `<img class="bs-bg" alt="" src="${artURL('web',620,540,'bottom')}">${statusPill()}<div class="bs-text"><div class="bs-logo">${esc(info.title)}</div><div class="bs-meta">${esc(info.kind)} · ${esc(info.meta)}</div>${extra}</div>`;
+  } else if(C.style==='pinboard'){
+    const art = info.g ? (info.g.scene ? `<img class="bs-bg scene" alt="" src="${sceneURL(info.g.scene,124,108,info.g.id)}">` : posterHTML(info.g,2,2)) : info.art ? `<img class="bs-bg" alt="" src="${artURL(info.art.art,620,540,info.art.id)}">` : info.app ? `<div class="app${info.app.pat?' pat':''}" style="--ac:${info.app.c};--af:${info.app.f}">${appIcon(info.app)}</div>` : `<img class="bs-bg" alt="" src="${artURL('moon',620,540,'pb')}">`;
+    html = `<div class="bs-art">${art}</div><div class="bs-shade"></div>${statusPill()}<div class="bs-text"><span class="bs-tag">${esc(info.kind)}</span><div class="bs-logo">${esc(info.title)}</div><div class="bs-meta">${esc(info.meta)}</div>${extra}</div>`;
+  } else {
+    const cv = info.g ? posterHTML(info.g,1,2) : info.art ? `<img class="art" alt="" src="${artURL(info.art.art,300,400,info.art.id)}">` : info.list && info.list[0] ? posterHTML(info.list[0],1,2) : `<img class="art" alt="" src="${artURL('blossom',300,400,'po')}">`;
+    html = `<div class="bs-glow"></div><div class="bs-cv">${cv}</div><div class="bs-side"><div class="bs-k">${esc(info.kind)}</div><div class="bs-logo">${esc(info.title)}</div><div class="bs-meta">${esc(info.meta)}</div>${extra}</div>`;
+  }
+  bottom.innerHTML = `<div class="bs">${html}<div class="bs-hints">${info.hints}${info.g&&!state.launch&&!state.open?'':''}</div></div>`;
+}
+
+/* ───── Actions ───── */
+function goPage(np, from, dir){
+  if(np<0 || np>=pages.length || np===state.page) return;
+  state.page = np;
+  if(from && dir){ const its = curPage().tiles, row = from.y + from.h/2; const onRow = its.filter(i => i.y <= row && row < i.y+i.h); const pool = (onRow.length ? onRow : its).slice(); pool.sort((a,b) => dir==='right' ? a.x-b.x : (b.x+b.w)-(a.x+a.w)); state.focus[np] = pool[0].id; }
+  refresh();
+}
+const rangeGap = (a,al,b,bl) => Math.max(0, Math.max(a,b) - Math.min(a+al,b+bl));
+function move(dir){
+  const its = curPage().tiles, cur = focused(); let best = null, bs = Infinity;
+  for(const it of its){
+    if(it===cur) continue; let gap, perp;
+    if(dir==='right'){ if(it.x < cur.x+cur.w) continue; gap = it.x-(cur.x+cur.w); perp = rangeGap(it.y,it.h,cur.y,cur.h); }
+    else if(dir==='left'){ if(it.x+it.w > cur.x) continue; gap = cur.x-(it.x+it.w); perp = rangeGap(it.y,it.h,cur.y,cur.h); }
+    else if(dir==='down'){ if(it.y < cur.y+cur.h) continue; gap = it.y-(cur.y+cur.h); perp = rangeGap(it.x,it.w,cur.x,cur.w); }
+    else { if(it.y+it.h > cur.y) continue; gap = cur.y-(it.y+it.h); perp = rangeGap(it.x,it.w,cur.x,cur.w); }
+    const cd = Math.abs((it.x+it.w/2)-(cur.x+cur.w/2)) + Math.abs((it.y+it.h/2)-(cur.y+cur.h/2));
+    const s = gap*10 + perp*25 + cd; if(s < bs){ bs = s; best = it; }
+  }
+  if(best){ setFocus(best.id); return; }
+  if(dir==='left' || dir==='right') goPage(state.page + (dir==='right'?1:-1), cur, dir);
+}
+function setFocus(id){ state.focus[state.page] = id; applyFocus(); renderBottom(); }
+let launchT, rollT;
+function launch(g){ state.launch = {id:g.id, t0:Date.now(), phase:'boot'}; renderOverlay(); renderBottom(); clearTimeout(launchT); launchT = setTimeout(() => { if(state.launch){ state.launch.phase = 'play'; renderOverlay(); } }, 1700); }
+function endLaunch(){ const g = byId[state.launch.id]; g.lastAt = Date.now(); g.pt += 1; played[g.id] = [g.lastAt, g.pt]; state.launch = null; saveLib(); renderAll(); toast(`${g.t} is now your last played`); }
+function openList(title, kind, rule, list){ state.open = {title, kind, rule, ids:list.map(g => g.id), i:0}; renderOverlay(); renderBottom(); }
+function roll(t){
+  clearInterval(rollT); let n = 0;
+  rollT = setInterval(() => {
+    const g = LIB[Math.floor(Math.random()*LIB.length)], el = track.querySelector(`[data-id="${t.id}"]`);
+    if(++n >= 14){ clearInterval(rollT); state.roll[t.id] = g.id; rerenderTile(t); renderBottom(); return; }
+    if(el) el.innerHTML = `<div class="clip">${posterHTML(g,t.w,t.h)}</div>`;
+  }, 65);
+}
+function musicCtl(t,a){ const s = musicState(t); if(a==='play') s.playing = !s.playing; if(a==='next'){ s.i = (s.i+1)%TRACKS.length; s.pos = 0; } if(a==='prev'){ s.i = (s.i-1+TRACKS.length)%TRACKS.length; s.pos = 0; } if(s.pos===41) s.pos = 42; rerenderTile(t); renderBottom(); }
+function toggleFav(g){ g.fav = !g.fav; saveLib(); const keep = state.open; renderAll(); state.open = keep; renderOverlay(); renderBottom(); toast(g.fav ? `Starred ${g.t}` : `Unstarred ${g.t}`); }
+function activate(){
+  const t = focused();
+  if(t.type==='game') return launch(byId[t.game]);
+  if(t.type==='folder') return openList(t.name, 'Folder · '+RULES[t.rule.kind], ruleText(t.rule), matchRule(t.rule));
+  if(t.type==='app') return toast(`Opens ${APPS[t.app].n}`);
+  if(t.type==='art') return toast('Image tiles are decoration');
+  switch(t.kind){
+    case 'lastImage': return launch(recentList(t.filter)[0]);
+    case 'random': return state.roll[t.id] ? launch(byId[state.roll[t.id]]) : roll(t);
+    case 'music': return musicCtl(t,'play');
+    case 'recent': return openList('Recently played','History','Newest first',recentList(t.filter));
+    case 'clock': return toast('Opens Android Clock');
+    case 'android': return toast('Opens the app behind this widget');
+    case 'playtime': return toast('Opens playtime history');
+  }
+}
+function press(btn){
+  if(state.launch){ if(btn==='B' && state.launch.phase==='play') endLaunch(); return; }
+  if(state.open){
+    const o = state.open, n = o.ids.length;
+    if(btn==='B'){ state.open = null; renderOverlay(); renderBottom(); return; }
+    if(btn==='A' && n) return launch(byId[o.ids[o.i]]);
+    if(btn==='X' && n) return toggleFav(byId[o.ids[o.i]]);
+    if(btn==='Y'){ state.details = !state.details; renderBottom(); return; }
+    const step = {left:-1,right:1,up:-7,down:7}[btn];
+    if(step && n){ o.i = Math.min(n-1, Math.max(0, o.i+step)); renderOverlay(); renderBottom(); }
+    return;
+  }
+  switch(btn){
+    case 'up': case 'down': case 'left': case 'right': return move(btn);
+    case 'A': return activate();
+    case 'B': { const t = focused(); if(state.roll[t.id]){ delete state.roll[t.id]; rerenderTile(t); renderBottom(); return; } if(state.page!==0) goPage(0); return; }
+    case 'X': { const t = focused(); if(t.type==='game') toggleFav(byId[t.game]); return; }
+    case 'Y': state.details = !state.details; renderBottom(); toast(state.details ? 'Bottom screen: details' : 'Bottom screen: showcase'); return;
+    case 'L': return goPage(state.page-1);
+    case 'R': return goPage(state.page+1);
+  }
+}
+
+/* ───── Input ───── */
+top.addEventListener('click', e => {
+  const mb = e.target.closest('[data-mus]');
+  if(mb){ e.stopPropagation(); const t = curPage().tiles.find(x => x.id===mb.closest('[data-id]').dataset.id); if(t){ setFocus(t.id); musicCtl(t, mb.dataset.mus); } return; }
+  const pg = e.target.closest('[data-page]'); if(pg){ goPage(+pg.dataset.page); return; }
+  const go = e.target.closest('[data-go]'); if(go){ goPage(state.page + (+go.dataset.go)); return; }
+  if(e.target.closest('.launch')){ press('B'); return; }
+  const fi = e.target.closest('[data-fi]');
+  if(fi && state.open){ const k = +fi.dataset.fi; if(state.open.i===k) press('A'); else { state.open.i = k; renderOverlay(); renderBottom(); } return; }
+  const tl = e.target.closest('.grid [data-id]');
+  if(tl && !state.open){ if(+tl.closest('.page').dataset.pi !== state.page) return; if(state.focus[state.page]===tl.dataset.id) press('A'); else setFocus(tl.dataset.id); }
+});
+document.querySelectorAll('[data-btn]').forEach(b => b.addEventListener('click', e => { e.preventDefault(); thor.focus({preventScroll:true}); press(b.dataset.btn); }));
+thor.addEventListener('pointerdown', () => setTimeout(() => thor.focus({preventScroll:true}), 0));
+const KEYMAP = {ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',Enter:'A',a:'A',Escape:'B',Backspace:'B',b:'B',x:'X',y:'Y',q:'L','[':'L',e:'R',']':'R'};
+thor.addEventListener('keydown', e => { const b = KEYMAP[e.key] || KEYMAP[e.key.toLowerCase()]; if(!b) return; e.preventDefault(); press(b); });
+const idle = 'Click the device, then use the keyboard. Tiles respond to clicks too: click once to select, again to open.';
+thor.addEventListener('focus', () => { $('#kbhint').innerHTML = '<b>Keyboard is live.</b> Arrows move, Enter opens, Esc goes back, X stars, Y flips the bottom screen to details, Q and E change pages.'; });
+thor.addEventListener('blur', () => { $('#kbhint').textContent = idle; });
+const GP = {0:'A',1:'B',2:'X',3:'Y',4:'L',5:'R',12:'up',13:'down',14:'left',15:'right'};
+let gpPrev = {}, gpRun = false, axT = 0;
+function gpLoop(){
+  const pads = navigator.getGamepads ? [...navigator.getGamepads()].filter(Boolean) : []; if(!pads.length){ gpRun = false; return; }
+  const gp = pads[0]; Object.entries(GP).forEach(([i,b]) => { const on = gp.buttons[i] && gp.buttons[i].pressed; if(on && !gpPrev[i]) press(b); gpPrev[i] = on; });
+  const [ax,ay] = gp.axes, now = performance.now(); if(now > axT && (Math.abs(ax)>.6 || Math.abs(ay)>.6)){ press(Math.abs(ax)>Math.abs(ay) ? (ax>0?'right':'left') : (ay>0?'down':'up')); axT = now + 220; }
+  requestAnimationFrame(gpLoop);
+}
+window.addEventListener('gamepadconnected', () => { if(!gpRun){ gpRun = true; gpLoop(); } });
+
+/* ───── Accent ───── */
+function applyAccent(){
+  const A = ACCENTS[state.accent], root = document.documentElement.style;
+  root.setProperty('--acc', A.acc); root.setProperty('--acc-hi', A.hi); root.setProperty('--acc-lo', A.lo);
+  document.querySelectorAll('#swatches button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.acc===state.accent)));
+}
+$('#swatches').innerHTML = Object.entries(ACCENTS).map(([k,a]) => `<button data-acc="${k}" aria-pressed="false"><i style="background:${a.acc};color:${a.acc}"></i>${a.n}</button>`).join('');
+$('#swatches').addEventListener('click', e => { const b = e.target.closest('[data-acc]'); if(!b) return; state.accent = b.dataset.acc; try{ localStorage.setItem(LS+'-accent', state.accent); }catch(err){} applyAccent(); renderAll(); });
+
+/* ───── Ticking ───── */
+let lastMin = new Date().getMinutes();
+setInterval(() => {
+  const d = new Date();
+  document.querySelectorAll('[data-now]').forEach(el => el.textContent = hm(d));
+  if(d.getMinutes()!==lastMin){ lastMin = d.getMinutes(); pages.forEach(p => p.tiles.filter(t => t.kind==='clock').forEach(rerenderTile)); }
+  pages.forEach(p => p.tiles.filter(t => t.kind==='music').forEach(t => {
+    const s = musicState(t); if(!s.playing) return; s.pos++;
+    if(s.pos >= TRACKS[s.i].len){ s.pos = 1; s.i = (s.i+1)%TRACKS.length; rerenderTile(t); return; }
+    const bar = track.querySelector(`[data-id="${t.id}"] [data-mp]`); if(bar) bar.style.width = (s.pos/TRACKS[s.i].len*100).toFixed(1)+'%';
+  }));
+}, 1000);
+
+/* ───── Page text ───── */
+thor.setAttribute('data-style', C.style); thor.setAttribute('aria-label', `${C.name} launcher on a black AYN Thor. Click, then use arrow keys, Enter, Escape, X, Y, Q and E.`);
+$('#eyebrow').textContent = C.eyebrow; $('#h1').innerHTML = C.title; $('#blurb').textContent = C.blurb; $('#kbhint').textContent = idle;
+$('#notes').innerHTML = C.notes.map(([a,b]) => `<div><h3>${esc(a)}</h3><p>${esc(b)}</p></div>`).join('');
+applyAccent(); renderAll();
+})();
+</script>
