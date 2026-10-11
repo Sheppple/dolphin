@@ -1,7 +1,7 @@
 """Animated page-header titles for an AYN Thor launcher, on a transparent background.
 
 Titles: HOME, LIBRARY, PLATFORMS, COLLECTIONS, APPS
-Colours: red (neon flicker + light sweep), blue (light sweep + colour-split glitch)
+Colours: red (light sweep + colour-split glitch + neon flicker), blue (light sweep + colour-split glitch)
 Sizes:   banner 900 x 300 (3x1 tile), strip 1800 x 300 (full-width 6x1 tile); the title is centred
 
 Two formats per header:
@@ -85,7 +85,7 @@ def render(style_key, title, w, h, font_dir):
         pre = title_rgb * tm[..., None] + S["glow"] * (glow_a * (1 - tm))[..., None]
         alpha = tm + glow_a * (1 - tm)
 
-        if style_key == "blue" and (0.40 <= t < 0.43 or 0.47 <= t < 0.49):
+        if 0.40 <= t < 0.43 or 0.47 <= t < 0.49:
             dx = int(h * 0.03)
             mag, cyn = np.zeros_like(tm), np.zeros_like(tm)
             mag[:, dx:] = tm[:, :-dx] * 0.7
@@ -130,8 +130,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--fonts", required=True)
     ap.add_argument("--out", default=".")
+    ap.add_argument("--styles", nargs="*", default=list(STYLES), help="subset of styles to render, e.g. --styles red")
     a = ap.parse_args()
-    for style in STYLES:
+    for style in a.styles:
         for title in TITLES:
             for size_key, (w, h) in SIZES.items():
                 frames = render(style, title, w, h, a.fonts)
