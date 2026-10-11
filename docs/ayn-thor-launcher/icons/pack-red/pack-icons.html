@@ -1,0 +1,91 @@
+<title>Red Pack Folder Icons</title>
+<style>
+  :root{color-scheme:dark}
+  body{margin:0;background:#111;display:flex;flex-wrap:wrap;gap:24px;padding:24px}
+  svg{width:512px;height:512px;display:block}
+  body.export{background:transparent;padding:0;gap:0}
+  body.export svg{width:1024px;height:1024px}
+</style>
+<div id="out"></div>
+<script>
+(() => {
+/* Matches the PSP icon from the theme pack, recoloured red:
+   rounded square, gradient border, dark duotone art + halftone dots, darker middle band, neon line-drawn wordmark. */
+const C = {border1:'#ff2d55', border2:'#a80f26', base:'#2a0a12', art:'#3d1019', artLine:'#5a1826', shade:'#1a0509', dot:'#100205', band:'#14040a', text1:'#ff4062', text2:'#c4142f'};
+
+// single-stroke letters in a 200 x 130 box, squared like the pack's "PSP"
+const LETTERS = {
+  A:'M0 130 V0 H200 V130 M0 70 H200',
+  L:'M0 0 V130 H200',
+  E:'M200 0 H0 V130 H200 M0 65 H150',
+  M:'M0 130 V0 H100 V80 M100 0 H200 V130',
+  U:'M0 0 V130 H200 V0'
+};
+function word(text, cx, cy){
+  const lw = 200, gap = 46, total = text.length*lw + (text.length-1)*gap, scale = 760/Math.max(total, 1);
+  const s = Math.min(scale, 1.05), x0 = cx - total*s/2, y0 = cy - 65*s;
+  return [...text].map((ch,i) => `<path d="${LETTERS[ch]}" transform="translate(${x0 + i*(lw+gap)*s} ${y0}) scale(${s})" vector-effect="non-scaling-stroke"/>`).join('');
+}
+
+// background artwork, drawn as dark duotone silhouettes
+const ART = {
+  all: `
+    <g opacity=".95">
+      <rect x="90" y="120" width="230" height="300" rx="26" fill="${C.art}" stroke="${C.artLine}" stroke-width="8" transform="rotate(-12 205 270)"/>
+      <rect x="120" y="150" width="170" height="70" rx="8" fill="${C.shade}" transform="rotate(-12 205 270)"/>
+      <path d="M150 300 h50 M175 275 v50" stroke="${C.artLine}" stroke-width="16" stroke-linecap="round" transform="rotate(-12 205 270)"/>
+      <circle cx="830" cy="230" r="150" fill="${C.art}" stroke="${C.artLine}" stroke-width="8"/>
+      <circle cx="830" cy="230" r="34" fill="${C.shade}" stroke="${C.artLine}" stroke-width="8"/>
+      <path d="M740 160 A110 110 0 0 1 830 120" stroke="#6e1e2e" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <path d="M360 560 C360 470 430 430 520 440 C560 445 640 445 680 440 C770 430 840 470 840 560 C840 700 760 800 680 750 C640 725 560 725 520 750 C440 800 360 700 360 560 Z" fill="${C.art}" stroke="${C.artLine}" stroke-width="10"/>
+      <path d="M440 560 h90 M485 515 v90" stroke="${C.shade}" stroke-width="26" stroke-linecap="round"/>
+      <circle cx="720" cy="530" r="22" fill="${C.shade}"/><circle cx="770" cy="575" r="22" fill="${C.shade}"/><circle cx="670" cy="575" r="22" fill="${C.shade}"/><circle cx="720" cy="620" r="22" fill="${C.shade}"/>
+      <rect x="560" y="80" width="150" height="190" rx="14" fill="${C.art}" stroke="${C.artLine}" stroke-width="8" transform="rotate(10 635 175)"/>
+      <rect x="585" y="110" width="100" height="70" rx="6" fill="${C.shade}" transform="rotate(10 635 175)"/>
+      <rect x="120" y="760" width="260" height="170" rx="20" fill="${C.art}" stroke="${C.artLine}" stroke-width="8" transform="rotate(8 250 845)"/>
+      <rect x="170" y="790" width="160" height="96" rx="8" fill="${C.shade}" transform="rotate(8 250 845)"/>
+    </g>`,
+  emu: `
+    <g opacity=".95">
+      <rect x="430" y="140" width="420" height="420" rx="40" fill="${C.art}" stroke="${C.artLine}" stroke-width="10" transform="rotate(8 640 350)"/>
+      <rect x="540" y="250" width="200" height="200" rx="20" fill="${C.shade}" stroke="${C.artLine}" stroke-width="8" transform="rotate(8 640 350)"/>
+      <g stroke="${C.artLine}" stroke-width="18" stroke-linecap="round" transform="rotate(8 640 350)">
+        <path d="M510 90 v40 M580 90 v40 M650 90 v40 M720 90 v40 M790 90 v40"/>
+        <path d="M510 570 v40 M580 570 v40 M650 570 v40 M720 570 v40 M790 570 v40"/>
+        <path d="M380 210 h40 M380 280 h40 M380 350 h40 M380 420 h40 M380 490 h40"/>
+        <path d="M860 210 h40 M860 280 h40 M860 350 h40 M860 420 h40 M860 490 h40"/>
+      </g>
+      <path d="M190 150 L90 250 L190 350" stroke="${C.artLine}" stroke-width="26" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M300 150 L400 250 L300 350" stroke="${C.artLine}" stroke-width="26" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M120 760 C120 680 180 650 250 655 C290 658 360 658 400 655 C470 650 530 680 530 760 C530 880 460 950 400 905 C360 880 290 880 250 905 C190 950 120 880 120 760 Z" fill="${C.art}" stroke="${C.artLine}" stroke-width="10"/>
+      <path d="M190 760 h70 M225 725 v70" stroke="${C.shade}" stroke-width="22" stroke-linecap="round"/>
+      <circle cx="430" cy="740" r="18" fill="${C.shade}"/><circle cx="470" cy="780" r="18" fill="${C.shade}"/>
+      <rect x="640" y="700" width="280" height="200" rx="18" fill="${C.art}" stroke="${C.artLine}" stroke-width="8" transform="rotate(-6 780 800)"/>
+      <path d="M680 760 h120 M680 800 h180 M680 840 h90" stroke="${C.shade}" stroke-width="16" stroke-linecap="round" transform="rotate(-6 780 800)"/>
+    </g>`
+};
+
+function icon(key, text){
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" data-key="${key}">
+  <defs>
+    <linearGradient id="${key}b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${C.border1}"/><stop offset="1" stop-color="${C.border2}"/></linearGradient>
+    <linearGradient id="${key}t" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${C.text1}"/><stop offset="1" stop-color="${C.text2}"/></linearGradient>
+    <pattern id="${key}d" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="11" cy="11" r="4.6" fill="${C.dot}" fill-opacity=".55"/></pattern>
+    <clipPath id="${key}c"><rect x="26" y="26" width="972" height="972" rx="64"/></clipPath>
+    <filter id="${key}g" x="-10%" y="-30%" width="120%" height="160%"><feGaussianBlur stdDeviation="9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect x="0" y="0" width="1024" height="1024" rx="88" fill="url(#${key}b)"/>
+  <g clip-path="url(#${key}c)">
+    <rect width="1024" height="1024" fill="${C.base}"/>
+    ${ART[key]}
+    <rect width="1024" height="1024" fill="url(#${key}d)"/>
+    <rect x="0" y="420" width="1024" height="190" fill="${C.band}" fill-opacity=".72"/>
+    <rect width="1024" height="1024" fill="#000" fill-opacity=".18"/>
+  </g>
+  <g fill="none" stroke="url(#${key}t)" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" filter="url(#${key}g)">${word(text, 512, 515)}</g>
+</svg>`;
+}
+document.getElementById('out').innerHTML = icon('all','ALL') + icon('emu','EMU');
+if(/[?&]export\b/.test(location.search)) document.body.classList.add('export');
+})();
+</script>
