@@ -3,7 +3,7 @@
 Titles: HOME, LIBRARY, PLATFORMS, COLLECTIONS, APPS
 Colours: red (light sweep + colour-split glitch + neon flicker), blue (light sweep + colour-split glitch)
 Sizes:   banner 900 x 300 (3x1 tile), strip 1800 x 300 (full-width 6x1 tile); the title is centred
-         tile-2x1 600 x 288: clean GIF for a 2-square Cocoon tile, tight glow, no dark halo on any background
+         tile-2x1 600 x 288: GIF for a 2-square Cocoon tile, full soft glow on a black rounded card
 
 Two formats per header:
   .gif   GIF transparency is on/off only, so the glow is blended onto black and cut out around it.
@@ -32,8 +32,9 @@ STYLES = {
 }
 TITLES = ["HOME", "LIBRARY", "PLATFORMS", "COLLECTIONS", "APPS"]
 SIZES = {"banner": (900, 300), "strip": (1800, 300)}
-# 2x1 Cocoon tile (two 279 px squares + a 24 px gap is about 582 x 279); clean GIF only
+# 2x1 Cocoon tile (two 279 px squares + a 24 px gap is about 582 x 279): soft glow on a black rounded card
 TILE_SIZE = (600, 288)
+TILE_RADIUS = 34
 CLEAN_ALPHA_CUTOFF = 0.3
 
 
@@ -158,6 +159,26 @@ def save_gif_clean(frames, path):
     out[0].save(path, save_all=True, append_images=out[1:], duration=FRAME_MS, loop=0, disposal=2, transparency=255, optimize=False)
 
 
+def save_gif_card(frames, path, radius=TILE_RADIUS):
+    """Soft glow composited onto an OLED-black rounded rectangle; only the corners are transparent."""
+    w, h = frames[0][0].shape[1], frames[0][0].shape[0]
+    card = Image.new("L", (w * 4, h * 4), 0)
+    ImageDraw.Draw(card).rounded_rectangle((0, 0, w * 4 - 1, h * 4 - 1), radius=radius * 4, fill=255)
+    inside = np.asarray(card.resize((w, h), Image.LANCZOS)) >= 128
+    rgbs = [Image.fromarray((np.clip(pre, 0, 1) * 255).astype(np.uint8), "RGB") for pre, _ in frames]
+    vis = np.concatenate([np.asarray(im)[inside] for im in rgbs])
+    pal = Image.fromarray(vis.reshape(1, -1, 3), "RGB").quantize(colors=255, method=Image.Quantize.MEDIANCUT)
+    palette = pal.getpalette()[:255 * 3] + [0, 0, 0]
+    out = []
+    for im in rgbs:
+        q = np.array(im.quantize(palette=pal, dither=Image.Dither.NONE))
+        q[~inside] = 255
+        p = Image.fromarray(q.astype(np.uint8), "P")
+        p.putpalette(palette)
+        out.append(p)
+    out[0].save(path, save_all=True, append_images=out[1:], duration=FRAME_MS, loop=0, disposal=2, transparency=255, optimize=False)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--fonts", required=True)
@@ -169,7 +190,7 @@ def main():
         for title in TITLES:
             path = Path(a.out) / style / "tile-2x1" / f"{title.lower()}.gif"
             path.parent.mkdir(parents=True, exist_ok=True)
-            save_gif_clean(render(style, title, *TILE_SIZE, a.fonts, clean=True), path)
+            save_gif_card(render(style, title, *TILE_SIZE, a.fonts), path)
             print(path, path.stat().st_size // 1024, "KB")
     if a.tiles_only:
         return
