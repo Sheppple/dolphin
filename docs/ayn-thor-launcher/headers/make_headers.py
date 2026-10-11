@@ -3,6 +3,7 @@
 Titles: HOME, LIBRARY, PLATFORMS, COLLECTIONS, APPS
 Colours: red (light sweep + colour-split glitch + neon flicker), blue (light sweep + colour-split glitch)
 Sizes:   banner 900 x 300 (3x1 tile), strip 1800 x 300 (full-width 6x1 tile); the title is centred
+         tile-2x1 600 x 288: clean GIF for a 2-square Cocoon tile, tight glow, no dark halo on any background
 
 Two formats per header:
   .gif   GIF transparency is on/off only, so the glow is blended onto black and cut out around it.
@@ -31,6 +32,9 @@ STYLES = {
 }
 TITLES = ["HOME", "LIBRARY", "PLATFORMS", "COLLECTIONS", "APPS"]
 SIZES = {"banner": (900, 300), "strip": (1800, 300)}
+# 2x1 Cocoon tile (two 279 px squares + a 24 px gap is about 582 x 279); clean GIF only
+TILE_SIZE = (600, 288)
+CLEAN_ALPHA_CUTOFF = 0.3
 
 
 def title_font(font_dir, size):
@@ -42,9 +46,10 @@ def title_font(font_dir, size):
     return f
 
 
-def render(style_key, title, w, h, font_dir):
+def render(style_key, title, w, h, font_dir, clean=False):
+    """clean=True: a tight glow only, so a hard-edged GIF has no dark halo on light backgrounds."""
     S = {k: np.array(v, dtype=np.float32) / 255.0 for k, v in STYLES[style_key].items()}
-    pad = int(h * 0.2)
+    pad = int(h * (0.1 if clean else 0.2))
     size = int(h * 0.46)
     while True:
         ft = title_font(font_dir, size)
@@ -59,6 +64,9 @@ def render(style_key, title, w, h, font_dir):
     g1 = np.asarray(mask_im.filter(ImageFilter.GaussianBlur(h * 0.025)), np.float32) / 255.0 * 1.5
     g2 = np.asarray(mask_im.filter(ImageFilter.GaussianBlur(h * 0.09)), np.float32) / 255.0 * 2.4
     glow_base = np.clip(0.9 * g1 + 0.55 * g2, 0, 1)
+    if clean:
+        tight = np.asarray(mask_im.filter(ImageFilter.GaussianBlur(h * 0.022)), np.float32) / 255.0
+        glow_base = np.clip(tight * 1.7, 0, 1)
 
     yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
     v = np.clip((yy - y0) / max(1, y1 - y0), 0, 1)[..., None]
@@ -78,7 +86,8 @@ def render(style_key, title, w, h, font_dir):
             inten = 1.0 + 0.05 * math.sin(2 * math.pi * 2 * t)
 
         shine = np.exp(-((diag - (-0.3 + 1.6 * t)) / 0.06) ** 2)[..., None]
-        title_rgb = np.clip(fill * min(inten, 1.0) + shine * 0.85, 0, 1)
+        # clean tiles: the flicker only cuts the neon edge; letters stay bright so they never turn muddy on light backgrounds
+        title_rgb = np.clip(fill * (max(min(inten, 1.0), 0.85) if clean else min(inten, 1.0)) + shine * 0.85, 0, 1)
         glow_a = np.clip(glow_base * inten, 0, 1)
 
         # premultiplied colour and alpha: title over its own glow
@@ -126,12 +135,44 @@ def save_gif(frames, path):
     out[0].save(path, save_all=True, append_images=out[1:], duration=FRAME_MS, loop=0, disposal=2, transparency=255, optimize=False)
 
 
+def save_gif_clean(frames, path):
+    """Hard-edged GIF with no dark fringe: every kept pixel uses its true (unpremultiplied) colour."""
+    rgbs, alphas = [], []
+    for pre, a in frames:
+        rgb = np.where(a[..., None] > 1e-4, pre / np.maximum(a[..., None], 1e-4), 0)
+        rgbs.append(Image.fromarray((np.clip(rgb, 0, 1) * 255).astype(np.uint8), "RGB"))
+        alphas.append(a)
+    w, h = rgbs[0].size
+    # build the palette from every frame's visible pixels, so dim flicker frames get their own colours
+    vis = np.concatenate([np.asarray(im)[al >= CLEAN_ALPHA_CUTOFF] for im, al in zip(rgbs, alphas)])
+    sample = Image.fromarray(vis.reshape(1, -1, 3).astype(np.uint8), "RGB")
+    pal = sample.quantize(colors=255, method=Image.Quantize.MEDIANCUT)
+    palette = pal.getpalette()[:255 * 3] + [0, 0, 0]
+    out = []
+    for im, a in zip(rgbs, alphas):
+        q = np.array(im.quantize(palette=pal, dither=Image.Dither.NONE))
+        q[a < CLEAN_ALPHA_CUTOFF] = 255
+        p = Image.fromarray(q.astype(np.uint8), "P")
+        p.putpalette(palette)
+        out.append(p)
+    out[0].save(path, save_all=True, append_images=out[1:], duration=FRAME_MS, loop=0, disposal=2, transparency=255, optimize=False)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--fonts", required=True)
     ap.add_argument("--out", default=".")
     ap.add_argument("--styles", nargs="*", default=list(STYLES), help="subset of styles to render, e.g. --styles red")
+    ap.add_argument("--tiles-only", action="store_true", help="only make the clean 2x1 tile GIFs")
     a = ap.parse_args()
+    for style in a.styles:
+        for title in TITLES:
+            path = Path(a.out) / style / "tile-2x1" / f"{title.lower()}.gif"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            save_gif_clean(render(style, title, *TILE_SIZE, a.fonts, clean=True), path)
+            print(path, path.stat().st_size // 1024, "KB")
+    if a.tiles_only:
+        return
     for style in a.styles:
         for title in TITLES:
             for size_key, (w, h) in SIZES.items():
